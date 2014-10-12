@@ -43,6 +43,27 @@ void print_data(union data_32bit data) {
   printf("32bit  : "); print_32bit(data.uint32);
 }
 
+// 下からnbitのORをとる 返り値0or1 
+int or_nbit(unsigned int num, int n) {
+  unsigned int all = (1 << n) - 1;
+  unsigned int result = num & all;
+  if (result > 0) 
+    return 1;
+  else
+    return 0;
+}
+
+//最近接偶数への丸め(round to the nearest even)
+unsigned int round_even(unsigned int num) {
+  int right4;
+  right4 = num & 15;
+  if ((4 < right4 && right4 < 8) || 11 < right4) 
+    num = (num >> 3) + 1;
+  else
+    num = num >> 3;
+  return (num);
+}
+
 
 uint32_t fadd(uint32_t a, uint32_t b) {
 
@@ -50,10 +71,9 @@ uint32_t fadd(uint32_t a, uint32_t b) {
   union data_32bit big, small;
   int diff;
   int i;
-
+  unsigned s_bit;  //sticky bit
   unsigned int temp;
-  unsigned int sum_frac;
-  unsigned int big_frac, small_frac;
+  unsigned int big_mant, small_mant, sum_mant;
   int compare_flag = 1;    // aとbの絶対値を比較
   // a == b --> 0, a != b --> 1
 
@@ -125,79 +145,84 @@ uint32_t fadd(uint32_t a, uint32_t b) {
       sum.uint32 = big.uint32;
 
     else {
-      if (a_32bit.sign == b_32bit.sign) {   // 同符号の場合
       
-	sum.uint32 = big.uint32;   // ?
-       
-	big_frac   = big.frac | (1 << 23);
-	small_frac = small.frac | (1 << 23);
-	small_frac = small_frac >> diff;
-	sum_frac = big_frac + small_frac;
-
-	// (sum_frac >> 24) > 0  : 下から25bit目が1であるとき
-	if (big.exp == 254 && (sum_frac >> 24) > 0) {
-	  sum.exp  = 255;
-	  sum.frac = 0;     // 繰り上がりによるinf
+      	big_mant   = big.frac | (1 << 23);
+	small_mant = small.frac | (1 << 23);
+  	
+	// ここから変更
+	big_mant = big_mant << 3;
+	if (diff < 4) {
+	  small_mant = small_mant << (3 - diff);
 	} else {
-	  if ((sum_frac >> 24) > 0) {  // 繰り上がりのある場合
-	    sum.exp = big.exp + 1;
-	    sum.frac = (sum_frac >> 1) & FRAC_MAX;
-	  } else {     // 繰り上がりのない場合
-	    sum.exp = big.exp;
-	    sum.frac = sum_frac & FRAC_MAX;
-	  }
+	  s_bit = or_nbit(small_mant, diff - 3);
+	  small_mant = small_mant >> (diff - 3);
+	  small_mant = (small_mant << 1) | s_bit;
 	}
-      } else {                              // 異符号の場合
-
-	if (compare_flag == 0) {            // 絶対値が等しい場合
-	  sum.sign = 0;
-	  sum.exp  = 0;
-	  sum.frac = 0;
-	  compare_flag = 0;
-	} else {                            // 絶対値が異なる場合
+	// ここまで変更
 	
-	  sum.sign = big.sign;
-	  diff = big.exp - small.exp;
-		  
-	  big_frac   = big.frac | (1 << 23);
-	  small_frac = small.frac | (1 << 23);
-
-	  big_frac   = big_frac << 2;
-	  small_frac = small_frac << 2;
-
-	  small_frac = small_frac >> diff;
-	  temp = big_frac - small_frac;
-	  //int left = ((small.frac | (1 << 23)) & ((1 << diff) - 1));
-	  // smallの(1.frac)のうち無視される部分(diff桁分)
-	
-	  i = 0;
-	  while ((temp >> (25 - i)) == 0) { //
-	    i++;
-	    if (i == 26) //
-	      break;
+	if (a_32bit.sign == b_32bit.sign) {   // 同符号の場合
+	  
+	  sum_mant = big_mant + small_mant;
+	  if (big.exp == 254 && (sum_mant >> 27)) {
+	    sum.exp = 255;
+	    sum.frac = 0;  // 繰り上がりによるinf
+	  } else {
+	    if ((sum_mant >> 27) > 0) { // 繰り上がりあり
+	      s_bit =  or_nbit(sum_mant, diff - 3);
+	      sum.frac = round_even(sum_mant) & FRAC_MAX;
+	    } else { // 繰り上がり無し
+	      sum.exp = big.exp;
+	      sum.frac = round_even(sum_mant) & FRAC_MAX;
+	    }
 	  }
+	    //sum.uint32 = big.uint32;   // ?   
+  
+
+	} else {                              // 異符号の場合
+
+	  if (compare_flag == 0) {            // 絶対値が等しい場合
+	    sum.sign = 0;
+	    sum.exp  = 0;
+	    sum.frac = 0;
+	    compare_flag = 0;
+	  } else {                            // 絶対値が異なる場合
+	    
+	    sum.sign = big.sign;
+
+	    temp = big_mant - small_mant;
+	    //int left = ((small.frac | (1 << 23)) & ((1 << diff) - 1));
+	    // smallの(1.frac)のうち無視される部分(diff桁分)
+	    
+	    i = 0;
+	    while ((temp >> (26 - i)) == 0) { //変更＋１
+	      i++;
+	      if (i == 27) //変更＋１
+		break;
+	    }
 	  // i == 24ならばここまで着ていないはず。
 	
-	  if (big.exp > i) {
-	    if (i < 26) { //
-	      sum.exp = big.exp - i;
-	      if (i < 2)
-	        sum.frac = temp >> (2 - i);
-	      else
-	        sum.frac = (temp & FRAC_MAX) << (i - 2); //
+	    if (big.exp > i) {
+	      if (i < 27) {
+		sum.exp = big.exp - i;
+		if (i < 4) {
+		  printf("\n\n(1)\n\n");
+		  sum.frac = round_even(temp << i) & FRAC_MAX;
+		} else { 
+		  printf("\n\n(2)\n\n");
+		  sum.frac = (temp & (FRAC_MAX)) << (i - 3) & FRAC_MAX;
+		}
+	      } else 
+		sum.uint32 = 0;
 	    }
-	  } else {
-	    sum.uint32 = 0;
 	  }
 	}
-      }
     }
   }
   return (sum.uint32);
 }
-      
+    
 
-uint32_t power(int n) {
+  uint32_t power(int n) {
   uint32_t s = 1;
   while (n > 0) {
     s = s * 2;
@@ -218,7 +243,7 @@ uint32_t str_to_uint32(char *str) {
 	         
 int main(void) {
   
-  union data_32bit a,b,c;
+  union data_32bit a,b;
   union data_32bit sum;
 
   int select_flag;
@@ -263,6 +288,14 @@ int main(void) {
   printf(" -- correct answer --\n");
   test.fl32 = a.fl32 + b.fl32;
   print_data(test);
+
+  /*
+  printf("----test----\n");
+  int m;
+  for (m = 1; m < 10; m++) {
+    printf("%u\n", or_nbit(sum.uint32, m));
+  }
+  */
 
   return(0);
 }
