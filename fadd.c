@@ -155,25 +155,38 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 	  small_mant = small_mant << (3 - diff);
 	} else {
 	  s_bit = or_nbit(small_mant, diff - 3);
-	  small_mant = small_mant >> (diff - 3);
+	  small_mant = small_mant >> (diff - 2);
 	  small_mant = (small_mant << 1) | s_bit;
 	}
 	// ここまで変更
 	
 	if (a_32bit.sign == b_32bit.sign) {   // 同符号の場合
-	  
+	
+	  sum.sign = big.sign;
 	  sum_mant = big_mant + small_mant;
-	  if (big.exp == 254 && (sum_mant >> 27)) {
-	    sum.exp = 255;
-	    sum.frac = 0;  // 繰り上がりによるinf
-	  } else {
-	    if ((sum_mant >> 27) > 0) { // 繰り上がりあり
-	      s_bit =  or_nbit(sum_mant, diff - 3);
-	      sum.frac = round_even(sum_mant) & FRAC_MAX;
-	    } else { // 繰り上がり無し
-	      sum.exp = big.exp;
-	      sum.frac = round_even(sum_mant) & FRAC_MAX;
+	  //if (big.exp == 254 && ((sum_mant >> 27) > 0)) {
+	  //  printf("\n\n(1)\n\n"); //
+	  //  sum.exp = 255;
+	  //  sum.frac = 0;  // 繰り上がりによるinf
+	  //} else {
+	  if ((sum_mant >> 27) > 0) { // 繰り上がりあり
+	    sum.exp = big.exp + 1;
+	    s_bit = or_nbit(sum_mant, 2);
+	    sum_mant = sum_mant >> 2;
+	    sum_mant = (sum_mant << 1) | s_bit;
+	    sum.frac = round_even(sum_mant) & FRAC_MAX;
+	    if (sum.exp >= 255) {
+	      sum.exp = 255;
+	      sum.frac = 0;
 	    }
+	  } else { // 繰り上がり無し
+	    sum.exp = big.exp;
+	    if ((round_even(sum_mant) >> 24) > 0) {
+	      sum.exp++;
+	      if (sum.exp == 255)
+		sum.frac = 0;
+	    } else
+	      sum.frac = round_even(sum_mant) & FRAC_MAX;
 	  }
 	    //sum.uint32 = big.uint32;   // ?   
   
@@ -204,13 +217,10 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 	    if (big.exp > i) {
 	      if (i < 27) {
 		sum.exp = big.exp - i;
-		if (i < 4) {
-		  printf("\n\n(1)\n\n");
+		if (i < 4) 
 		  sum.frac = round_even(temp << i) & FRAC_MAX;
-		} else { 
-		  printf("\n\n(2)\n\n");
-		  sum.frac = (temp & (FRAC_MAX)) << (i - 3) & FRAC_MAX;
-		}
+		else  
+		  sum.frac = (temp & (FRAC_MAX)) << (i - 3) & FRAC_MAX;	
 	      } else 
 		sum.uint32 = 0;
 	    }
@@ -241,6 +251,7 @@ uint32_t str_to_uint32(char *str) {
   return (sum);
 }
 	         
+#if 0
 int main(void) {
   
   union data_32bit a,b;
@@ -258,8 +269,8 @@ int main(void) {
   } else {
     char a_str[33], b_str[33];
     printf("--------------------------------\n");
-    printf("a(32bit) :\n"); scanf("%s", a_str);
-    printf("b(32bit) :\n"); scanf("%s", b_str);
+    printf("a(32bit) :\n"); scanf("%32s", a_str);
+    printf("b(32bit) :\n"); scanf("%32s", b_str);
     a.uint32 = str_to_uint32(a_str);
     b.uint32 = str_to_uint32(b_str);
   }
@@ -300,6 +311,7 @@ int main(void) {
   return(0);
 }
 
+#endif
 
 /* bit列入力用 */
 /*
