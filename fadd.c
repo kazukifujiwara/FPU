@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define FRAC_MAX 8388607
+#define FRAC_MAX 8388607 // 2^23 - 1
 
 union data_32bit {
   struct {
@@ -21,14 +21,14 @@ uint32_t lrotate(uint32_t n) {
 }
 
 /* デバッグ用　ビット列を表示 */
-void print_32bit(uint32_t n) { 
+void print_32bit(uint32_t n) {
   int i;
   int temp = n;
-  //uint32_t one = 1;          //下の変更で異常がなければ不要
   for (i = 0; i < 32; i++) {
-    temp = lrotate(temp);
-    printf("%u", temp & 1);  //変更
-    if (i == 0 || i == 8) printf(" ");
+    printf("%u", (temp >> (31-i)) & 1);  // 左から取り出す
+    if (i == 0 || i == 8) {
+      printf(" "); // 1 + 8 + 23
+    }
   }
   printf("\n");
 }
@@ -232,21 +232,12 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 }
     
 
-  uint32_t power(int n) {
-  uint32_t s = 1;
-  while (n > 0) {
-    s = s * 2;
-    n--;
-  }
-  return (s);
-}
-
 uint32_t str_to_uint32(char *str) {
   int i;
   uint32_t sum = 0;
   for (i = 0; i < 32; i++) {
     if (str[i] == '1')
-      sum = sum + power(31-i);
+      sum = sum + (1 << (31-i));
   }
   return (sum);
 }
