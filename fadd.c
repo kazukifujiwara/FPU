@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define FRAC_MAX 8388607
+#define FRAC_MAX 8388607 // 2^23
 
 union data_32bit {
   struct {
@@ -21,14 +21,14 @@ uint32_t lrotate(uint32_t n) {
 }
 
 /* デバッグ用　ビット列を表示 */
-void print_32bit(uint32_t n) { 
+void print_32bit(uint32_t n) {
   int i;
   int temp = n;
-  //uint32_t one = 1;          //下の変更で異常がなければ不要
   for (i = 0; i < 32; i++) {
-    temp = lrotate(temp);
-    printf("%u", temp & 1);  //変更
-    if (i == 0 || i == 8) printf(" ");
+    printf("%u", (temp >> (31 - i)) & 1);
+    if (i == 0 || i == 8) {
+      printf(" "); // 1 + 8 + 23;
+    }
   }
   printf("\n");
 }
@@ -164,11 +164,7 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 	
 	  sum.sign = big.sign;
 	  sum_mant = big_mant + small_mant;
-	  //if (big.exp == 254 && ((sum_mant >> 27) > 0)) {
-	  //  printf("\n\n(1)\n\n"); //
-	  //  sum.exp = 255;
-	  //  sum.frac = 0;  // 繰り上がりによるinf
-	  //} else {
+
 	  if ((sum_mant >> 27) > 0) { // 繰り上がりあり
 	    sum.exp = big.exp + 1;
 	    s_bit = or_nbit(sum_mant, 2);
@@ -212,7 +208,6 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 	      if (i == 27) //変更＋１
 		break;
 	    }
-	  // i == 24ならばここまで着ていないはず。
 	
 	    if (big.exp > i) {
 	      if (i < 27) {
@@ -230,23 +225,14 @@ uint32_t fadd(uint32_t a, uint32_t b) {
   }
   return (sum.uint32);
 }
-    
 
-  uint32_t power(int n) {
-  uint32_t s = 1;
-  while (n > 0) {
-    s = s * 2;
-    n--;
-  }
-  return (s);
-}
 
 uint32_t str_to_uint32(char *str) {
   int i;
   uint32_t sum = 0;
   for (i = 0; i < 32; i++) {
     if (str[i] == '1')
-      sum = sum + power(31-i);
+      sum = sum + (1 << (31 - i));
   }
   return (sum);
 }
@@ -312,46 +298,3 @@ int main(void) {
 }
 
 #endif
-
-/* bit列入力用 */
-/*
-
-
-int main(void) {
-  union data_32bit a, b;
-  union data_32bit sum;
-  char a_str[33], b_str[33];
- 
-  printf("--------------------------------\n");
-  printf("a(32bit) :\n"); scanf("%s", a_str);
-  printf("b(32bit) :\n"); scanf("%s", b_str);
-  
-  a.uint32 = str_to_uint32(a_str);
-  b.uint32 = str_to_uint32(b_str);
-
-  printf("-- a --\n");
-  print_data(a);
-  
-  printf("\n");
-
-  printf("-- b --\n");
-  print_data(b);
-
-  printf("\n");
-
-  sum.uint32 = fadd(a.uint32, b.uint32);
-  
-  printf("-- sum --\n");
-  print_data(sum);
-
-  printf("\n");
-
-  union data_32bit test;
-
-  printf(" -- correct answer --\n");
-  test.fl32 = a.fl32 + b.fl32;
-  print_data(test);
-
-  return 0;
-}
-*/
