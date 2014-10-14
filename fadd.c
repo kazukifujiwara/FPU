@@ -3,6 +3,11 @@
 #include <stdlib.h>
 
 #define FRAC_MAX 8388607 // 2^23
+#define ZERO     0
+#define NZERO    2147483648
+#define INF      2139095040
+#define NINF     4286578688
+
 
 union data_32bit {
   struct {
@@ -53,7 +58,7 @@ int or_nbit(unsigned int num, int n) {
     return 0;
 }
 
-//最近接偶数への丸め(round to the nearest even)
+//最近接偶数への丸め(round to the nearest even) -- 注：27bit -> 24bit
 unsigned int round_even(unsigned int num) {
   int right4;
   right4 = num & 15;
@@ -64,6 +69,14 @@ unsigned int round_even(unsigned int num) {
   return (num);
 }
 
+//最近接偶数丸めにより仮数部がオーバーフローしてしまうときに'1'を返す。
+//"11111111111111111111101" ～ "11111111111111111111111111" のとき。
+int round_even_carry(unsigned int num) {
+  if (67108861 <= num && num <= 67108863)
+    return 1;
+  else
+    return 0;
+}
 
 uint32_t fadd(uint32_t a, uint32_t b) {
 
@@ -92,21 +105,35 @@ uint32_t fadd(uint32_t a, uint32_t b) {
       sum.frac = FRAC_MAX; // NaN
     } else {
       if (a_32bit.sign == 0)
-	sum.sign = 0;
+	sum.uint32 = INF;
       else
-	sum.sign = 1;
-      sum.exp  = 255;
-      sum.frac = 0;     // inf or -inf
+	sum.uint32 = NINF; // inf or -inf
     }
   } else if (a_32bit.exp == 255) {
-    sum.sign = a_32bit.sign;
-    sum.exp  = 255;
-    sum.frac = 0;       // inf or -inf
+    if (a_32bit.sign == 0)
+      sum.uint32 = INF;
+    else
+      sum.uint32 = NINF; // inf or -inf
   } else if (b_32bit.exp == 255) {
-    sum.sign = b_32bit.sign;
-    sum.exp  = 255;
-    sum.frac = 0;       // inf or -inf
-  } else if (a_32bit.exp == 0 && a_32bit.frac == 0) {
+    if (b_32bit.sign == 0)
+      sum.uint32 = INF;
+    else
+      sum.uint32 = NINF; // inf or -inf
+  } 
+  /*
+else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
+    sum.uint32 = NZERO;
+  else if (a_32bit.uint32 == ZERO && b_32bit.uint32 == NZERO)
+    sum.uint32 = ZERO;
+  else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == ZERO)
+    sum.uint32 = ZERO;
+  else if (a_32bit.uint32 == ZERO || a_32bit.uint32 == NZERO)
+    sum.uint32 = b_32bit.uint32;
+  else if (b_32bit.uint32 == ZERO || b_32bit.uint32 == NZERO)
+    sum.uint32 = a_32bit.uint32;
+  */
+  
+ else if (a_32bit.exp == 0 && a_32bit.frac == 0) {
     if (b_32bit.exp == 0 && b_32bit.frac == 0) {
       sum.uint32 = 0;
       if (a_32bit.sign == 1 && b_32bit.sign == 1)
@@ -117,6 +144,8 @@ uint32_t fadd(uint32_t a, uint32_t b) {
     sum.uint32 = b_32bit.uint32;
   else if (b_32bit.exp == 0)
     sum.uint32 = a_32bit.uint32;
+
+
   else {
     
     if (a_32bit.exp > b_32bit.exp) {
@@ -140,8 +169,8 @@ uint32_t fadd(uint32_t a, uint32_t b) {
     }
     
     diff = big.exp - small.exp;
-    
-    if (diff > 25)
+
+    if (diff > 25) // >= or >
       sum.uint32 = big.uint32;
 
     else {
@@ -154,7 +183,7 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 	if (diff < 4) {
 	  small_mant = small_mant << (3 - diff);
 	} else {
-	  s_bit = or_nbit(small_mant, diff - 3);
+	  s_bit = or_nbit(small_mant, diff - 2); // diff - 3 から変更
 	  small_mant = small_mant >> (diff - 2);
 	  small_mant = (small_mant << 1) | s_bit;
 	}
@@ -201,23 +230,31 @@ uint32_t fadd(uint32_t a, uint32_t b) {
 	    temp = big_mant - small_mant;
 	    //int left = ((small.frac | (1 << 23)) & ((1 << diff) - 1));
 	    // smallの(1.frac)のうち無視される部分(diff桁分)
-	    
+
+	    //上から何bit目に初めて1が現れるか(0~26)
 	    i = 0;
 	    while ((temp >> (26 - i)) == 0) { //変更＋１
 	      i++;
 	      if (i == 27) //変更＋１
-		break;
+		break; // i == 27 の場合、絶対値が等しいので処理済み
 	    }
 	
+	    //printf("i = %d\n", i); // for debug
+	    //printf("big.exp = %u\n", big.exp);
+
 	    if (big.exp > i) {
 	      if (i < 27) {
 		sum.exp = big.exp - i;
-		if (i < 4) 
+		if (i < 4) { 
 		  sum.frac = round_even(temp << i) & FRAC_MAX;
-		else  
+		  //if (round_even_carry(temp << i) == 1)         //追加
+		  //  sum.exp++;
+		} else  
 		  sum.frac = (temp & (FRAC_MAX)) << (i - 3) & FRAC_MAX;	
-	      } else 
-		sum.uint32 = 0;
+	      }
+	    } else {
+	      sum.exp = 0;
+	      sum.frac = 0;
 	    }
 	  }
 	}
@@ -226,6 +263,23 @@ uint32_t fadd(uint32_t a, uint32_t b) {
   return (sum.uint32);
 }
 
+char *delete_space(char *str) {
+  char *new = calloc(33, sizeof(char));
+  int i = 0;
+  int j = 0;
+  while (str[i] != '\0') {
+    if (str[i] != ' ') {
+      new[j] = str[i];
+      i++;
+      j++;
+    } else
+      i++;
+  }
+  j++;
+  new[j] = '\0';
+
+  return (new);
+}
 
 uint32_t str_to_uint32(char *str) {
   int i;
@@ -256,9 +310,13 @@ int main(void) {
     char a_str[33], b_str[33];
     printf("--------------------------------\n");
     printf("a(32bit) :\n"); scanf("%32s", a_str);
+    //gets(a_str);                                    //なぜか読み飛ばされる
     printf("b(32bit) :\n"); scanf("%32s", b_str);
+    //gets(b_str);
     a.uint32 = str_to_uint32(a_str);
     b.uint32 = str_to_uint32(b_str);
+    //a.uint32 = str_to_uint32(delete_space(a_str));
+    //b.uint32 = str_to_uint32(delete_space(b_str));
   }
     
   printf("\n");
