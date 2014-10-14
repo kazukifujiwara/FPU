@@ -3,10 +3,10 @@
 #include <stdlib.h>
 
 #define FRAC_MAX 8388607 // 2^23
-#define ZERO     0
-#define NZERO    2147483648
-#define INF      2139095040
-#define NINF     4286578688
+#define ZERO     0u
+#define NZERO    2147483648u
+#define INF      2139095040u
+#define NINF     4286578688u
 
 
 union data_32bit {
@@ -70,9 +70,9 @@ unsigned int round_even(unsigned int num) {
 }
 
 //最近接偶数丸めにより仮数部がオーバーフローしてしまうときに'1'を返す。
-//"11111111111111111111101" ～ "11111111111111111111111111" のとき。
+//"11111111111111111111100" ～ "11111111111111111111111111" のとき。
 int round_even_carry(unsigned int num) {
-  if (67108861 <= num && num <= 67108863)
+  if (0x7fffffcu <= num && num <= 0x7ffffffu)
     return 1;
   else
     return 0;
@@ -121,7 +121,7 @@ uint32_t fadd(uint32_t a, uint32_t b) {
       sum.uint32 = NINF; // inf or -inf
   } 
   /*
-else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
+  else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
     sum.uint32 = NZERO;
   else if (a_32bit.uint32 == ZERO && b_32bit.uint32 == NZERO)
     sum.uint32 = ZERO;
@@ -133,7 +133,8 @@ else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
     sum.uint32 = a_32bit.uint32;
   */
   
- else if (a_32bit.exp == 0 && a_32bit.frac == 0) {
+  /* 非正規化数を0として計算 */
+  else if (a_32bit.exp == 0 && a_32bit.frac == 0) {
     if (b_32bit.exp == 0 && b_32bit.frac == 0) {
       sum.uint32 = 0;
       if (a_32bit.sign == 1 && b_32bit.sign == 1)
@@ -144,8 +145,7 @@ else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
     sum.uint32 = b_32bit.uint32;
   else if (b_32bit.exp == 0)
     sum.uint32 = a_32bit.uint32;
-
-
+  
   else {
     
     if (a_32bit.exp > b_32bit.exp) {
@@ -170,7 +170,7 @@ else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
     
     diff = big.exp - small.exp;
 
-    if (diff > 25) // >= or >
+    if (diff > 25)
       sum.uint32 = big.uint32;
 
     else {
@@ -178,16 +178,14 @@ else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
       	big_mant   = big.frac | (1 << 23);
 	small_mant = small.frac | (1 << 23);
   	
-	// ここから変更
 	big_mant = big_mant << 3;
 	if (diff < 4) {
 	  small_mant = small_mant << (3 - diff);
 	} else {
-	  s_bit = or_nbit(small_mant, diff - 2); // diff - 3 から変更
+	  s_bit = or_nbit(small_mant, diff - 2);
 	  small_mant = small_mant >> (diff - 2);
 	  small_mant = (small_mant << 1) | s_bit;
 	}
-	// ここまで変更
 	
 	if (a_32bit.sign == b_32bit.sign) {   // 同符号の場合
 	
@@ -213,8 +211,6 @@ else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
 	    } else
 	      sum.frac = round_even(sum_mant) & FRAC_MAX;
 	  }
-	    //sum.uint32 = big.uint32;   // ?   
-  
 
 	} else {                              // 異符号の場合
 
@@ -228,27 +224,23 @@ else if (a_32bit.uint32 == NZERO && b_32bit.uint32 == NZERO)
 	    sum.sign = big.sign;
 
 	    temp = big_mant - small_mant;
-	    //int left = ((small.frac | (1 << 23)) & ((1 << diff) - 1));
-	    // smallの(1.frac)のうち無視される部分(diff桁分)
 
 	    //上から何bit目に初めて1が現れるか(0~26)
 	    i = 0;
-	    while ((temp >> (26 - i)) == 0) { //変更＋１
+	    while ((temp >> (26 - i)) == 0) {
 	      i++;
-	      if (i == 27) //変更＋１
+	      if (i == 27)
 		break; // i == 27 の場合、絶対値が等しいので処理済み
 	    }
 	
-	    //printf("i = %d\n", i); // for debug
-	    //printf("big.exp = %u\n", big.exp);
-
 	    if (big.exp > i) {
 	      if (i < 27) {
 		sum.exp = big.exp - i;
 		if (i < 4) { 
 		  sum.frac = round_even(temp << i) & FRAC_MAX;
-		  //if (round_even_carry(temp << i) == 1)         //追加
-		  //  sum.exp++;
+		  if (round_even_carry(temp << i) == 1) {
+		    sum.exp++; //丸めによる仮数部の桁溢れの処理
+		  }
 		} else  
 		  sum.frac = (temp & (FRAC_MAX)) << (i - 3) & FRAC_MAX;	
 	      }
@@ -298,25 +290,26 @@ int main(void) {
   union data_32bit sum;
 
   int select_flag;
+  char select_buf[10];
   printf("select import form :\n");
   printf("float -> 0\n");
   printf("32bit -> 1 (others)\n");
-  scanf("%d", &select_flag);
+  gets(select_buf);
+  sscanf(select_buf, "%d\n", &select_flag);
 
   if (select_flag == 0) {
     printf("a.fl32 : "); scanf("%f", &a.fl32);
     printf("b.fl32 : "); scanf("%f", &b.fl32);
   } else {
-    char a_str[33], b_str[33];
-    printf("--------------------------------\n");
-    printf("a(32bit) :\n"); scanf("%32s", a_str);
-    //gets(a_str);                                    //なぜか読み飛ばされる
-    printf("b(32bit) :\n"); scanf("%32s", b_str);
-    //gets(b_str);
-    a.uint32 = str_to_uint32(a_str);
-    b.uint32 = str_to_uint32(b_str);
-    //a.uint32 = str_to_uint32(delete_space(a_str));
-    //b.uint32 = str_to_uint32(delete_space(b_str));
+    char a_str[35], b_str[35];
+    printf("詰めて入力しても可\n");
+    printf("- --exp--- -------fraction--------\n");
+    printf("a(32bit) :\n");
+    gets(a_str);
+    printf("b(32bit) :\n");
+    gets(b_str);
+    a.uint32 = str_to_uint32(delete_space(a_str));
+    b.uint32 = str_to_uint32(delete_space(b_str));
   }
     
   printf("\n");
@@ -343,14 +336,6 @@ int main(void) {
   printf(" -- correct answer --\n");
   test.fl32 = a.fl32 + b.fl32;
   print_data(test);
-
-  /*
-  printf("----test----\n");
-  int m;
-  for (m = 1; m < 10; m++) {
-    printf("%u\n", or_nbit(sum.uint32, m));
-  }
-  */
 
   return(0);
 }
