@@ -129,6 +129,11 @@ uint32_t fmul(uint32_t a, uint32_t b) {
     result.sign = 0;
     result.exp  = 255;
     result.frac = FRAC_MAX;  // NaN
+  } else if ((a_32bit.exp == 255 && b_32bit.exp == 0) ||
+	     (a_32bit.exp == 0 && b_32bit.exp == 255)) {
+    result.sign = 0;
+    result.exp  = 255;
+    result.frac = FRAC_MAX;  // NaN
   } else if ((a_32bit.exp == 255) || (b_32bit.exp == 255)) {
     result.sign = a_32bit.sign ^ b_32bit.sign;
     result.exp  = 255;
@@ -196,7 +201,8 @@ uint32_t fmul(uint32_t a, uint32_t b) {
       result.exp  = 255;
       result.frac = 0;   // inf or -inf
     } else if (exp <= 0) {
-      result.exp = 0;
+      result.exp  = 0;
+      result.frac = 0;  //非正規仮数はすべて0にする
     } else {
       result.exp = exp;
     }
