@@ -2,6 +2,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/*
+fadd.c, fmul.cなど他の関数と一緒にコンパイルする。
+main関数を使用しない場合は不要。
+*/
+
+
 union data_32bit {
   struct {
     unsigned int frac : 23;
