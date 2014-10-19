@@ -161,7 +161,7 @@ uint32_t fmul(uint32_t a, uint32_t b) {
 }
 
 	         
-//#if 0
+#if 0
 int main(void) {
   
   union data_32bit a,b;
@@ -218,4 +218,4 @@ int main(void) {
   return(0);
 }
 
-//#endif
+#endif
