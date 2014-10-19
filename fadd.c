@@ -20,33 +20,14 @@ union data_32bit {
 };
 
 
-/* デバッグ用 ビット列を回転 */
-uint32_t lrotate(uint32_t n) {
-  return ((n << 1)+(n >> 31));
-}
-
 /* デバッグ用　ビット列を表示 */
-void print_32bit(uint32_t n) {
-  int i;
-  int temp = n;
-  for (i = 0; i < 32; i++) {
-    printf("%u", (temp >> (31 - i)) & 1);
-    if (i == 0 || i == 8) {
-      printf(" "); // 1 + 8 + 23;
-    }
-  }
-  printf("\n");
-}
+void print_32bit(uint32_t n);
 
+void print_data(union data_32bit data);
 
-void print_data(union data_32bit data) {
-  printf("float  : %f\n", data.fl32);
-  printf("uint32 : %u\n", data.uint32);
-  printf("sign   : %u\n", data.sign);
-  printf("exp    : %u\n", data.exp);
-  printf("frac   : %u\n", data.frac);
-  printf("32bit  : "); print_32bit(data.uint32);
-}
+char *delete_space(char *str);
+
+uint32_t str_to_uint32(char *str);
 
 // 下からnbitのORをとる 返り値0or1 
 int or_nbit(unsigned int num, int n) {
@@ -69,8 +50,8 @@ unsigned int round_even(unsigned int num) {
   return (num);
 }
 
-//最近接偶数丸めにより仮数部がオーバーフローしてしまうときに'1'を返す。
-//"11111111111111111111100" ～ "11111111111111111111111111" のとき。
+//最近接偶数丸めにより仮数部がオーバーフローしてしまうときに'1'を返す。 注意: 27bit
+//"111111111111111111111111100" ～ "111111111111111111111111111" のとき。
 int round_even_carry(unsigned int num) {
   if (0x7fffffcu <= num && num <= 0x7ffffffu)
     return 1;
@@ -253,34 +234,6 @@ uint32_t fadd(uint32_t a, uint32_t b) {
     }
   }
   return (sum.uint32);
-}
-
-char *delete_space(char *str) {
-  char *new = calloc(33, sizeof(char));
-  int i = 0;
-  int j = 0;
-  while (str[i] != '\0') {
-    if (str[i] != ' ') {
-      new[j] = str[i];
-      i++;
-      j++;
-    } else
-      i++;
-  }
-  j++;
-  new[j] = '\0';
-
-  return (new);
-}
-
-uint32_t str_to_uint32(char *str) {
-  int i;
-  uint32_t sum = 0;
-  for (i = 0; i < 32; i++) {
-    if (str[i] == '1')
-      sum = sum + (1 << (31 - i));
-  }
-  return (sum);
 }
 	         
 #if 0
