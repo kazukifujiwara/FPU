@@ -31,7 +31,8 @@ architecture blackbox of FMUL is
   is
     variable carry : std_logic;
   begin
-    if (4 < num(3 downto 0) and num(3 downto 0) < 8) or 11 < num(3 downto 0) then
+    -- "11 1111 1111 1111 1111 1111 1011"より大きいかどうか
+    if num(25 downto 0) > x"3fffffb" then
       carry := '1';
     else
       carry := '0';
