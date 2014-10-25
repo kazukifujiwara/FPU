@@ -2,15 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
+#include "futil.h"
 
 /* デバッグ用　ビット列を表示 */
 void print_32bit(uint32_t n);
@@ -29,8 +21,8 @@ uint32_t fsub(uint32_t a, uint32_t b) {
   return fadd(a, fneg(b));
 }
 
-	         
-//#if 0
+
+#if 0
 int main(void) {
   
   union data_32bit a,b;
@@ -87,7 +79,4 @@ int main(void) {
   return(0);
 }
 
-//#endif
-
-
-  
+#endif
