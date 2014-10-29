@@ -37,28 +37,48 @@ uint32_t make_denormal() {
   return (temp.uint32);
 }
 
+//2^32-1まで。32bitで返す
+void output(uint32_t num, FILE *fp) {
+  fprintf(fp, "%08x\n", num);
+}
+
+/*
+void output(uint32_t num, FILE *fp) {
+  int i;
+  char *temp = calloc(33, sizeof(char));
+  for (i = 0; i < 32; i++) {
+    if (num % 2 == 1)
+      temp[31-i] = '1';
+    else
+      temp[31-i] = '0';
+    num = num / 2;
+  }
+  temp[32] = '\0';
+  fprintf(fp, "%s\n", temp);
+  free(temp);
+}
+*/
+
 //一方の引数を指定した場合のテストケースを生成＆ファイル出力
 void fix_one(uint32_t a, FILE *fp) {
   uint32_t b;
   int i;
-  b = ZERO;   fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-  b = NZERO;  fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-  b = INF;    fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-  b = NINF;   fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
+
+  b = ZERO;   output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+  b = NZERO;  output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+  b = INF;    output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+  b = NINF;   output(a,fp); output(b,fp); output(b,fp); output(a,fp);
   for (i = 0; i < 10; i++) {
     b = make_nan();
-    fprintf(fp, "%08x %08x\n", a, b);
-    fprintf(fp, "%08x %08x\n", b, a);
+    output(a,fp); output(b,fp); output(b,fp); output(a,fp);
   }
   for (i = 0; i < 10; i++) {
     b = make_denormal();
-    fprintf(fp, "%08x %08x\n", a, b);
-    fprintf(fp, "%08x %08x\n", b, a);
+    output(a,fp); output(b,fp); output(b,fp); output(a,fp);
   }
   for (i = 0; i < 500; i++) {
     b = genrand_int32();
-    fprintf(fp, "%08x %08x\n", a, b);
-    fprintf(fp, "%08x %08x\n", b, a);
+    output(a,fp); output(b,fp); output(b,fp); output(a,fp);
   }
 }
 
@@ -81,55 +101,49 @@ int main(void) {
   //一方がNaNの場合
   for (i = 0; i < 50; i++) {
     a = make_nan();
-    b = ZERO;   fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-    b = NZERO;  fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-    b = INF;    fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-    b = NINF;   fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
+    b = ZERO;   output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+    b = NZERO;  output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+    b = INF;    output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+    b = NINF;   output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     for (i = 0; i < 10; i++) {
       b = make_nan();
-      fprintf(fp, "%08x %08x\n", a, b);
-      fprintf(fp, "%08x %08x\n", b, a);
+      output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     }
     for (i = 0; i < 10; i++) {
       b = make_denormal();
-      fprintf(fp, "%08x %08x\n", a, b);
-      fprintf(fp, "%08x %08x\n", b, a);
+      output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     } 
     for (i = 0; i < 50; i++) {
       b = genrand_int32();
-      fprintf(fp, "%08x %08x\n", a, b);
-      fprintf(fp, "%08x %08x\n", b, a);
+      output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     }
   }
 
   //一方が非正規仮数の場合
   for (i = 0; i < 50; i++) {
     a = make_denormal();
-    b = ZERO;   fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-    b = NZERO;  fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-    b = INF;    fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
-    b = NINF;   fprintf(fp, "%08x %08x\n", a, b); fprintf(fp, "%08x %08x\n", b, a);
+    b = ZERO;   output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+    b = NZERO;  output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+    b = INF;    output(a,fp); output(b,fp); output(b,fp); output(a,fp);
+    b = NINF;   output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     for (i = 0; i < 10; i++) {
       b = make_nan();
-      fprintf(fp, "%08x %08x\n", a, b);
-      fprintf(fp, "%08x %08x\n", b, a);
+      output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     }
     for (i = 0; i < 10; i++) {
       b = make_denormal();
-      fprintf(fp, "%08x %08x\n", a, b);
-      fprintf(fp, "%08x %08x\n", b, a);
+      output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     } 
     for (i = 0; i < 50; i++) {
       b = genrand_int32();
-      fprintf(fp, "%08x %08x\n", a, b);
-      fprintf(fp, "%08x %08x\n", b, a);
+      output(a,fp); output(b,fp); output(b,fp); output(a,fp);
     }
   } 
 
   for (i = 0; i < 50000; i++) {
     a = genrand_int32();
     b = genrand_int32();
-    fprintf(fp, "%08x %08x\n", a, b);
+    output(a,fp); output(b,fp);
   };
 
   printf("success (> %s)\n", FILE_NAME);
