@@ -1,0 +1,9 @@
+*.o
+fadd
+finv
+fmul
+fneg
+fsqrt
+fsub
+test_finv
+test_fmul

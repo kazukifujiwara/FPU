@@ -7,9 +7,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "def.h"
-#include "finv.c"
+#include "print.h"
 
-void print_data(union data_32bit data);
+uint32_t finv(uint32_t org);
 
 void show_testcase(union data_32bit a,
 		   union data_32bit result, union data_32bit correct) {

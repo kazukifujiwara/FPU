@@ -2,18 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
+#include "def.h"
+#include "print.h"
 
 uint32_t fmul(uint32_t a, uint32_t b);
-void print_data(union data_32bit data);
 
 void show_testcase(union data_32bit a, union data_32bit b,
 		   union data_32bit result, union data_32bit correct) {
