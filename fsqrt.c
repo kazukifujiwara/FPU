@@ -5,19 +5,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include "def.h"
-#include "fadd.c"
-#include "fmul.c"
-
 
 #define MAX      512  // 1 ~ 2, 2 ~ 4 をそれぞれ512分割(計1024分割)
 #define MASK9    8372224 //((1 << 9) - 1) << 14 精度を変更する場合注意
 #define MASK10   8380416 //((1 << 10) - 1) << 13  精度を変更する場合注意
-#define FRAC_MAX 8388607 // 2^23
-#define ZERO     0u
-#define NZERO    2147483648u
-#define INF      2139095040u
-#define NINF     4286578688u
-#define NNAN     4290772992u
+
+uint32_t fadd(uint32_t a, uint32_t b);
+
+uint32_t fmul(uint32_t a, uint32_t b);
 
 double make_a(double t, double c) {
   double a;

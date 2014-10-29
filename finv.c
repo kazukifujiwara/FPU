@@ -4,16 +4,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
-#include "fadd.c"
-#include "fmul.c"
+#include "def.h"
 
 #define MAX 2048
 #define MASK11 8384512  //((1 << 11) - 1) << 12
-#define FRAC_MAX 8388607 // 2^23
-#define ZERO     0u
-#define NZERO    2147483648u
-#define INF      2139095040u
-#define NINF     4286578688u
+
+uint32_t fadd(uint32_t a, uint32_t b);
+
+uint32_t fmul(uint32_t a, uint32_t b);
 
 double make_a(double t, double c) {
   double a;

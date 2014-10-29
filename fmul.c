@@ -3,12 +3,6 @@
 #include <stdlib.h>
 #include "def.h"
 
-#define FRAC_MAX 8388607 // 2^23
-#define ZERO     0u
-#define NZERO    2147483648u
-#define INF      2139095040u
-#define NINF     4286578688u
-
 uint32_t fmul(uint32_t a, uint32_t b) {
 
   union data_32bit a_32bit, b_32bit, result;

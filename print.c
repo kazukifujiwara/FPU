@@ -2,25 +2,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "def.h"
+
 /*
 fadd.c, fmul.cなど他の関数と一緒にコンパイルする。
 main関数を使用しない場合は不要。
 */
-
-#ifndef DEF_H
-#define DEF_H
-
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
-
-#endif
 
 /* デバッグ用　long long int を指定されたbit数の列で表示。越える場合は越えて表示 */
 void llitobit(long long int num, int max) {

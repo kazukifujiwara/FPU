@@ -1,25 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <math.h>
 
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
-
-/* デバッグ用　ビット列を表示 */
-void print_32bit(uint32_t n);
-
-void print_data(union data_32bit data);
-
-char *delete_space(char *str);
-
-uint32_t str_to_uint32(char *str);
+#include "def.h"
+#include "print.h"
 
 uint32_t fsqrt(uint32_t a);
 
