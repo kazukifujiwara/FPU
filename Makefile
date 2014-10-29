@@ -1,24 +1,27 @@
 EXES = fadd fmul fneg fsub finv fsqrt
+LIBS = def.o print.o
+CC = gcc
+CFLAGS = -Wall
+LD = gcc
+LDFLAGS = -lm
 
 all: $(EXES)
 
-fadd: fadd.c fadd_main.c print.c
-	gcc -Wall fadd.c fadd_main.c print.c -o fadd
+fadd: fadd_main.o fadd.o $(LIBS)
 
-fmul: fmul.c fmul_main.c print.c
-	gcc -Wall fmul.c fmul_main.c print.c -o fmul
+fmul: fmul_main.o fmul.o $(LIBS)
 
-fneg: fneg.c fneg_main.c print.c
-	gcc -Wall fneg.c fneg_main.c print.c -o fneg
+fneg: fneg_main.o fneg.o $(LIBS)
 
-fsub: fsub.c fsub_main.c print.c fadd.c fneg.c
-	gcc -Wall fsub.c fadd.c fneg.c fsub_main.c print.c -o fsub
+fsub: fsub_main.o fsub.o fadd.o fneg.o $(LIBS)
 
-finv: finv.c finv_main.c print.c
-	gcc -Wall finv.c finv_main.c print.c -o finv -lm
+finv: finv_main.o finv.o fadd.o fmul.o $(LIBS)
+	$(LD) -o $@ $^ $(LDFLAGS)
 
-fsqrt: fsqrt.c fsqrt_main.c print.c
-	gcc -Wall fsqrt.c fsqrt_main.c print.c -o fsqrt -lm
+fsqrt: fsqrt_main.o fsqrt.o fadd.o fmul.o $(LIBS)
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm -f $(EXES) *.o *~
+
+.PHONY: all clean

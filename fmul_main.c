@@ -2,33 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define FRAC_MAX 8388607 // 2^23
-#define ZERO     0u
-#define NZERO    2147483648u
-#define INF      2139095040u
-#define NINF     4286578688u
-
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
-
-/* デバッグ用　long long int を指定されたbit数の列で表示。越える場合は越えて表示 */
-void llitobit(long long int num, int max);
-
-/* デバッグ用　ビット列を表示 */
-void print_32bit(uint32_t n);
-
-void print_data(union data_32bit data);
-
-char *delete_space(char *str);
-
-uint32_t str_to_uint32(char *str);
+#include "def.h"
+#include "print.h"
 
 uint32_t fmul(uint32_t a, uint32_t b);
 
