@@ -41,10 +41,10 @@ uint32_t finv(uint32_t org) {
     result.sign = 0;
     result.exp  = 255;
     result.frac = FRAC_MAX; // NaN -> NaN
-  } else if (original.uint32 == ZERO) {
-    result.uint32 = INF;
-  } else if (original.uint32 == NZERO) {
-    result.uint32 = NINF;
+  } else if (original.sign == 0 && original.exp == 0) {
+    result.uint32 = INF;    //非正規仮数(正)は0として処理
+  } else if (original.sign == 1 && original.exp == 0) {
+    result.uint32 = NINF;   //非正規仮数(負)は-0として処理
   } else if (original.uint32 == INF) {
     result.uint32 = ZERO;
   } else if (original.uint32 == NINF) {
