@@ -47,7 +47,7 @@ int main(void) {
 
   union data_32bit test;
 
-  printf(" -- correct answer --\n");
+  printf("-- correct answer --\n");
   test.fl32 = 1.0 / a.fl32;
   print_data(test);
 

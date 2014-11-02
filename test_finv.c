@@ -1,6 +1,7 @@
 /*
   コンパイル時コマンド
-  gcc test_finv.c print.c -lm
+  旧: gcc test_finv.c print.c -lm
+  新: gcc test_finv.c fmul.c fadd.c print.c def.c -lm
 */
 
 #include <stdio.h>
@@ -84,13 +85,13 @@ int main(void)
     exit(EXIT_FAILURE);
   }
 
-  while(fscanf(fp, "%x", &a_uint32) != EOF) {
+  while(fscanf(fp, "%8x", &a.uint32) != EOF) {
     n.uint32 = normalize(a.uint32);
     result.uint32 = finv(a.uint32);
     correct.fl32 = 1.0 / n.fl32;  //非正規仮数を0に潰す
 
     if (n.uint32 != a.uint32 && count_mistake <= 10) {
-      printf("normalized!!!!!\n"); //debug
+      //printf("normalized!!!!!\n"); //debug
     }
 
     if (equal(result.uint32, correct.uint32) == 1) {
@@ -101,11 +102,11 @@ int main(void)
     } else {
       //printf("0\n");  //一致しなければ0
       count_mistake++;
-      if (count_mistake <= 10) {
+      if (count_mistake <= 5) {
 	show_testcase(a, result, correct);
       }
-      if (count_mistake == 10) {
-	printf("more than 10 mistakes.\n");
+      if (count_mistake == 5) {
+	printf("more than 5 mistakes.\n");
       }
     }
   }
