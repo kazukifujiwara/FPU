@@ -37,13 +37,7 @@ uint32_t make_denormal() {
   return (temp.uint32);
 }
 
-//2^32-1まで。32bitで返す
-void output(uint32_t a, uint32_t b, FILE *fp) {
-  fprintf(fp, "%08x %08x\n", a, b);                 //修正
-}
-
-/*
-void output(uint32_t num, FILE *fp) {
+void output_sub(uint32_t num, FILE *fp) {
   int i;
   char *temp = calloc(33, sizeof(char));
   for (i = 0; i < 32; i++) {
@@ -54,10 +48,19 @@ void output(uint32_t num, FILE *fp) {
     num = num / 2;
   }
   temp[32] = '\0';
-  fprintf(fp, "%s\n", temp);
+  fprintf(fp, "%s", temp);
   free(temp);
 }
-*/
+
+void output(uint32_t a, uint32_t b, FILE *fp) {
+  output_sub(a,fp);
+  fprintf(fp, "\n");
+  output_sub(b,fp);
+  fprintf(fp, "\n");
+  //fprintf(fp, "%08x %08x\n", a, b);                 //修正
+}
+
+
 
 //一方の引数を指定した場合のテストケースを生成＆ファイル出力
 void fix_one(uint32_t a, FILE *fp) {
