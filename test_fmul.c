@@ -5,6 +5,7 @@
 
 #include "def.h"
 #include "print.h"
+#include "fmul.c"
 
 //test
 uint32_t str_to_uint32t(char *str) {
@@ -20,7 +21,7 @@ uint32_t str_to_uint32t(char *str) {
   return (result);
 }
 
-uint32_t fmul(uint32_t a, uint32_t b);
+//uint32_t fmul(uint32_t a, uint32_t b);
 
 void print_data(union data_32bit data);
 
@@ -90,8 +91,7 @@ int equal(uint32_t a_uint32, uint32_t b_uint32) {
 int main(void)
 {
   FILE *fp;
-  union data_32bit a, b, result, correct;
-  uint32_t a_uint32, b_uint32;
+  union data_32bit a, b, na, nb, result, correct;
   char a_str[33], b_str[33];
   int count_mistake = 0; //誤答数をカウント
   int count_1bit_diff = 0; //1bitずれをカウント
@@ -106,14 +106,14 @@ int main(void)
 
   while(fscanf(fp, "%s", a_str) != EOF) {
     fscanf(fp, "%s", b_str);
-    a_uint32 = str_to_uint32t(a_str);
-    b_uint32 = str_to_uint32t(b_str);
-    a.uint32 = normalize(a_uint32);
-    b.uint32 = normalize(b_uint32);
+    a.uint32 = str_to_uint32t(a_str);
+    b.uint32 = str_to_uint32t(b_str);
+    na.uint32 = normalize(a.uint32);
+    nb.uint32 = normalize(b.uint32);
     //printf("a: %10u  ", a.uint32);
     //printf("b: %10u\n", b.uint32);
     result.uint32 = fmul(a.uint32, b.uint32);
-    correct.fl32 = a.fl32 * b.fl32;
+    correct.fl32 = na.fl32 * nb.fl32;
     //printf("result  : %10u\n", result.uint32);
     //printf("correct : %10u\n", correct.uint32);
     if (equal(result.uint32, correct.uint32) == 1) {

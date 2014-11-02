@@ -7,10 +7,25 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "def.h"
 #include "print.h"
+#include "finv.c"
 
-uint32_t finv(uint32_t org);
+//uint32_t finv(uint32_t org);
+
+uint32_t str_to_uint32t(char *str) {
+  int i;
+  uint32_t result = 0;
+  
+  for (i = 0; i < 32; i++) {
+    if (str[i] == '1') {
+      result += (1 << (31 - i));
+    }
+  }
+  //printf("%u\n", result); //debug
+  return (result);
+}
 
 void show_testcase(union data_32bit a,
 		   union data_32bit result, union data_32bit correct) {
@@ -76,16 +91,19 @@ int main(void)
 {
   FILE *fp;
   union data_32bit a, n, result, correct;
-  uint32_t a_uint32;
+  char a_str[33];
   int count_mistake = 0; //誤答数をカウント
   int count_1bit_diff = 0; //1bitずれをカウント
+
+  memset(a_str, '\0', 33);
 
   if ((fp = fopen("testcase.txt", "r")) == NULL) {
     printf("file open error.\n");
     exit(EXIT_FAILURE);
   }
 
-  while(fscanf(fp, "%8x", &a.uint32) != EOF) {
+  while(fscanf(fp, "%s", a_str) != EOF) {
+    a.uint32 = str_to_uint32t(a_str);
     n.uint32 = normalize(a.uint32);
     result.uint32 = finv(a.uint32);
     correct.fl32 = 1.0 / n.fl32;  //非正規仮数を0に潰す
@@ -109,6 +127,7 @@ int main(void)
 	printf("more than 5 mistakes.\n");
       }
     }
+    memset(a_str, '\0', 33);
   }
 
   printf("total 1bit_diff : %d\n", count_1bit_diff);

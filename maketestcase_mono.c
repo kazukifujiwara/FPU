@@ -38,12 +38,6 @@ uint32_t make_denormal() {
 }
 
 void output(uint32_t num, FILE *fp) {
-  fprintf(fp, "%08x\n", num);
-}
-
-//2^32-1まで。32bitで返す
-/*
-void output(uint32_t num, FILE *fp) {
   int i;
   char *temp = calloc(33, sizeof(char));
   for (i = 0; i < 32; i++) {
@@ -57,7 +51,13 @@ void output(uint32_t num, FILE *fp) {
   fprintf(fp, "%s\n", temp);
   free(temp);
 }
+
+/*
+void output(uint32_t num, FILE *fp) {
+  fprintf(fp, "%08x\n", num);
+}
 */
+
 
 int main(void) {
   int i;
