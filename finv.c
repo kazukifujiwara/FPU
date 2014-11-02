@@ -27,7 +27,6 @@ double make_b(double t, double c) {
 }
 
 uint32_t finv(uint32_t org) {
-  float a_fl,b_fl;
   double a_db,b_db,c,t;
   unsigned int index;
   union data_32bit a,b,fraction,result,original;
@@ -65,24 +64,28 @@ uint32_t finv(uint32_t org) {
 
       c = 1.0 / MAX;
       index = (fraction.frac & MASK11) >> 12;
-      t = 1 + c * index;
+      t = 1 + (c * index);
       a_db = make_a(t,c) * (-1);
       b_db = make_b(t,c);
-      a_fl = (float)a_db;
-      b_fl = (float)b_db;
-      a.fl32 = a_fl;
-      b.fl32 = b_fl;
+      a.fl32 = (float)a_db;
+      b.fl32 = (float)b_db;
       fraction.uint32 = fadd(fmul(a.uint32, fraction.uint32), b.uint32);
     
       result.sign = original.sign;
       if (original.exp >= 127) {
 	d = original.exp - 127;
-	result.exp = 127 - d - 1;
+	if (d < 126) {
+	  result.exp = 127 - d - 1;
+	  result.frac = fraction.frac;
+	} else {
+	  result.exp = 0;
+	  result.frac = 0;
+	}
       } else {
 	d = 127 - original.exp;
 	result.exp = 127 + d - 1;
+	result.frac = fraction.frac;
       }
-      result.frac = fraction.frac;
     }
   }
   return (result.uint32);
