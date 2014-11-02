@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 union data_32bit {
   struct {
@@ -12,7 +13,22 @@ union data_32bit {
   uint32_t uint32;
 };
 
+//test
+uint32_t str_to_uint32t(char *str) {
+  int i;
+  uint32_t result = 0;
+  
+  for (i = 0; i < 32; i++) {
+    if (str[i] == '1') {
+      result += (1 << (31 - i));
+    }
+  }
+  //printf("%u\n", result); //debug
+  return (result);
+}
+
 uint32_t fmul(uint32_t a, uint32_t b);
+
 void print_data(union data_32bit data);
 
 void show_testcase(union data_32bit a, union data_32bit b,
@@ -83,15 +99,22 @@ int main(void)
   FILE *fp;
   union data_32bit a, b, result, correct;
   uint32_t a_uint32, b_uint32;
+  char a_str[33], b_str[33];
   int count_mistake = 0; //誤答数をカウント
   int count_1bit_diff = 0; //1bitずれをカウント
 
+  memset(a_str, '\0', 33);
+  memset(b_str, '\0', 33);
+  
   if ((fp = fopen("testcase.txt", "r")) == NULL) {
     printf("file open error.\n");
     exit(EXIT_FAILURE);
   }
 
-  while(fscanf(fp, "%x %x", &a_uint32, &b_uint32) != EOF) {
+  while(fscanf(fp, "%s", a_str) != EOF) {
+    fscanf(fp, "%s", b_str);
+    a_uint32 = str_to_uint32t(a_str);
+    b_uint32 = str_to_uint32t(b_str);
     a.uint32 = normalize(a_uint32);
     b.uint32 = normalize(b_uint32);
     //printf("a: %10u  ", a.uint32);
@@ -108,6 +131,8 @@ int main(void)
       count_mistake++;
       show_testcase(a, b, result, correct);
     }
+    memset(a_str, '\0', 33);
+    memset(b_str, '\0', 33);
   }
 
   printf("total 1bit_diff : %d\n", count_1bit_diff);
