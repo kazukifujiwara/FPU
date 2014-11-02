@@ -78,10 +78,10 @@ char *delete_space(char *str) {
       new[j] = str[i];
       i++;
       j++;
-    } else
+    } else {
       i++;
+    }
   }
-  j++;
   new[j] = '\0';
 
   return (new);
@@ -91,8 +91,9 @@ uint32_t str_to_uint32(char *str) {
   int i;
   uint32_t sum = 0;
   for (i = 0; i < 32; i++) {
-    if (str[i] == '1')
+    if (str[i] == '1') {
       sum = sum + (1 << (31 - i));
+    }
   }
   return (sum);
 }
