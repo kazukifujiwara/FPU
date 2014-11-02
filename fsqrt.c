@@ -14,13 +14,13 @@ uint32_t fadd(uint32_t a, uint32_t b);
 
 uint32_t fmul(uint32_t a, uint32_t b);
 
-double make_a(double t, double c) {
+static double make_a(double t, double c) {
   double a;
   a = 1 / (sqrt(t+c) + sqrt(t));
   return a;
 }
 
-double make_b(double t, double c) {
+static double make_b(double t, double c) {
   double b, temp;
   temp = (2 * make_a(t,c) * sqrt(t)) - 1;
   b = (2 - temp * temp) / (8 * make_a(t,c));

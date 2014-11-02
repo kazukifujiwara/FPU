@@ -2,24 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "MT.h"
+#include "def.h"
 
 #define MAX 4294967295 // 2^32-1
 #define FILE_NAME "testcase.txt"
-
-#define ZERO     0u
-#define NZERO    2147483648u
-#define INF      2139095040u
-#define NINF     4286578688u
-
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
 
 //NaNを生成
 uint32_t make_nan() {

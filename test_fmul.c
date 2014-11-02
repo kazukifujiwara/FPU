@@ -3,15 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-union data_32bit {
-  struct {
-    unsigned int frac : 23;
-    unsigned int exp  : 8;
-    unsigned int sign : 1;
-  };
-  float fl32;
-  uint32_t uint32;
-};
+#include "def.h"
+#include "print.h"
 
 //test
 uint32_t str_to_uint32t(char *str) {
