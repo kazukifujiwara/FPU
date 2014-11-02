@@ -5,7 +5,6 @@
 
 #include "def.h"
 #include "print.h"
-#include "fmul.c"
 
 //test
 uint32_t str_to_uint32t(char *str) {
@@ -21,7 +20,7 @@ uint32_t str_to_uint32t(char *str) {
   return (result);
 }
 
-//uint32_t fmul(uint32_t a, uint32_t b);
+uint32_t fmul(uint32_t a, uint32_t b);
 
 void print_data(union data_32bit data);
 

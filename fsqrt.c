@@ -34,10 +34,16 @@ uint32_t fsqrt(uint32_t org) {
   unsigned int index; //どのグループに属するかを示す値(1<x<4を0~2^10-1に割り当てる)
   
   original.uint32 = org;
-  if (original.uint32 == ZERO || original.uint32 == NZERO) {
-    result.uint32 = original.uint32;
-  } else if (original.sign == 1) {
-    result.uint32 = NNAN;   // 負の数 -> -NaN
+  if (original.sign == 1) {
+    if (original.exp == 0) {
+      result.uint32 = NZERO;  // -0 -> -0 (非正規化数も含む)
+    } else {
+      result.uint32 = NNAN;   // 負の数 -> -nan
+    }
+  } else if (original.exp == 0) {
+    result.uint32 = ZERO;  // 0 -> 0 (非正規化数も含む)
+  } else if (original.exp == 255 && original.frac != 0) {
+    result.uint32 = MY_NAN; // nan -> nan
   } else if (original.uint32 == INF) {
     result.uint32 = INF;    // inf -> inf ??
   } else {

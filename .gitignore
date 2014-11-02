@@ -1,4 +1,6 @@
 *.o
+*~
+*/
 fadd
 finv
 fmul
@@ -7,3 +9,6 @@ fsqrt
 fsub
 test_finv
 test_fmul
+a.out
+answer.txt
+testcase.txt

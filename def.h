@@ -10,6 +10,7 @@
 #define NZERO    2147483648u
 #define INF      2139095040u
 #define NINF     4286578688u
+#define MY_NAN      2147483647u
 #define NNAN     4290772992u
 
 union data_32bit {

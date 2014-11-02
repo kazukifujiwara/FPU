@@ -1,7 +1,7 @@
 /*
   コンパイル時コマンド
   旧: gcc test_finv.c print.c -lm
-  新: gcc test_finv.c fmul.c fadd.c print.c def.c -lm
+  新: gcc test_finv.c finv.c fmul.c fadd.c print.c def.c -lm
 */
 
 #include <stdio.h>
@@ -10,9 +10,8 @@
 #include <string.h>
 #include "def.h"
 #include "print.h"
-#include "finv.c"
 
-//uint32_t finv(uint32_t org);
+uint32_t finv(uint32_t org);
 
 uint32_t str_to_uint32t(char *str) {
   int i;
@@ -52,7 +51,7 @@ uint32_t normalize(uint32_t a) {
 }
 
 
-//一致ならば1,不一致ならば0,1bitずれならば2を返す
+//一致ならば1,不一致ならば0,2bitずれ以内ならば2を返す
 int equal(uint32_t a_uint32, uint32_t b_uint32) {
   union data_32bit a, b;
   int diff;
@@ -79,8 +78,8 @@ int equal(uint32_t a_uint32, uint32_t b_uint32) {
       return 1;
     } else {
       diff = a.uint32 - b.uint32;
-      if (diff == 1 || diff == -1)
-	return 2; //誤差の範囲が1bit以内の場合
+      if (-2 <= diff && diff <= 2)
+	return 2; //誤差の範囲が2bit以内の場合
       else
 	return 0;
     }
@@ -130,7 +129,7 @@ int main(void)
     memset(a_str, '\0', 33);
   }
 
-  printf("total 1bit_diff : %d\n", count_1bit_diff);
+  printf("total ~2bit_diff : %d\n", count_1bit_diff);
   printf("total mistakes  : %d\n", count_mistake);
 
   fclose(fp);
