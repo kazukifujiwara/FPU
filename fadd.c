@@ -59,8 +59,8 @@ uint32_t fadd(uint32_t a, uint32_t b) {
   */
   
   /* 非正規化数を0として計算 */
-  else if (a_32bit.exp == 0 && a_32bit.frac == 0) {
-    if (b_32bit.exp == 0 && b_32bit.frac == 0) {
+  else if (a_32bit.exp == 0) {
+    if (b_32bit.exp == 0) {
       sum.uint32 = 0;
       if (a_32bit.sign == 1 && b_32bit.sign == 1)
 	sum.sign = 1;

@@ -98,18 +98,30 @@ architecture blackbox of FADD is
     sum := inf;
   elsif a = ninf or b = ninf then
     sum := ninf;
-  elsif a = zero or a = nzero then
-    if a = nzero and b = nzero then
-      sum := nzero;
-    elsif b = zero or b = nzero then
-      sum := zero;
+  elsif a(30 downto 23) = 0 then
+    if b(30 downto 23) = 0 then
+      if a(31) = '1' and b(31) = '1' then
+        sum := nzero;
+      else
+        sum := zero;
+      end if;
     else
       sum := b;
     end if;
-  elsif a(30 downto 23) = "00000000" then
-    sum := b;
-  elsif b(30 downto 23) = "00000000" then
-    sum := a;
+  elsif b(30 downto 23) = 0 then
+    sum := a; 
+  --elsif a = zero or a = nzero then
+  --  if a = nzero and b = nzero then
+  --    sum := nzero;
+  --  elsif b = zero or b = nzero then
+  --    sum := zero;
+  --  else
+  --    sum := b;
+  --  end if;
+  --elsif a(30 downto 23) = "00000000" then
+  --  sum := b;
+  --elsif b(30 downto 23) = "00000000" then
+  --  sum := a;
   else
     diff := exp1 - exp2;
     if diff > 25 then             -- 整数と比較可能？
