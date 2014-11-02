@@ -1,5 +1,5 @@
 EXES = fadd fmul fneg fsub finv fsqrt
-TESTS = test_finv test_fmul
+TESTS = test_fadd test_fmul test_finv test_fsqrt
 LIBS = def.o print.o
 CC = gcc
 CFLAGS = -Wall
@@ -22,10 +22,16 @@ finv: finv_main.o finv.o fadd.o fmul.o $(LIBS)
 fsqrt: fsqrt_main.o fsqrt.o fadd.o fmul.o $(LIBS)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
-test_finv: test_finv.o finv.o fadd.o fmul.o $(LIBS)
+test_fadd: test_fadd.o fadd.o $(LIBS)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 test_fmul: test_fmul.o fmul.o $(LIBS)
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+test_finv: test_finv.o finv.o fadd.o fmul.o $(LIBS)
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+test_fsqrt: test_fsqrt.o fsqrt.o fadd.o fmul.o $(LIBS)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean:

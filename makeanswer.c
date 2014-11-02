@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "fsub.c"                  //ここを書き換える
+#include "fadd.c"                  //ここを書き換える
 #include "def.c"
 
 
@@ -61,7 +61,7 @@ int main(void) {
     fscanf(input, "%s", b_text);
     a = to_uint32(a_text);
     b = to_uint32(b_text);
-    ans = fsub(a, b);               //ここを書き換える
+    ans = fadd(a, b);               //ここを書き換える
     output_32bit(ans, output);
   }
   
