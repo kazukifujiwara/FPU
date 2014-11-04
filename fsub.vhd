@@ -18,23 +18,16 @@ use IEEE.std_logic_misc.all;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
 
+library work;
+use work.fadd_p.all;
+use work.fneg_p.all;
+
 entity fsub is
   Port ( A,B : in std_logic_vector(31 downto 0);
          S   : out std_logic_vector(31 downto 0));
 end entity fsub;
 
 architecture blackbox of FSUB is
-
-  component fadd
-    port(A : in std_logic_vector(31 downto 0);
-         B : in std_logic_vector(31 downto 0);
-         S : out std_logic_vector(31 downto 0));
-  end component;
-
-  component fneg
-    port(A : in std_logic_vector(31 downto 0);
-         S : out std_logic_vector(31 downto 0));
-  end component;
 
   signal i1 : std_logic_vector(31 downto 0);
   signal i2 : std_logic_vector(31 downto 0);
