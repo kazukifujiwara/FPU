@@ -40,7 +40,7 @@ architecture blackbox of FSUB is
   signal i2 : std_logic_vector(31 downto 0);
   signal n2 : std_logic_vector(31 downto 0);
   signal o1 : std_logic_vector(31 downto 0);
-  
+
 begin
   -- Component Instantiation
   fadd_connect: fadd port map(
@@ -56,4 +56,4 @@ begin
   i2 <= B;
   S  <= o1;
 end blackbox;
-  
+
