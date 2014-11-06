@@ -20,7 +20,7 @@ use std.textio.all;
 use ieee.std_logic_textio.all;
 
 library work;
-use work.fpu_util_p.all;
+use work.fpu_common_p.all;
 
 entity fadd is
   Port ( A,B : in std_logic_vector(31 downto 0);

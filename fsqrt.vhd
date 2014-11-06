@@ -19,7 +19,7 @@ use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
 
 library work;
-use work.fpu_util_p.all;
+use work.fpu_common_p.all;
 
 entity fsqrt is
   port ( A : in  std_logic_vector(31 downto 0);

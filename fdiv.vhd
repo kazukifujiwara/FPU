@@ -18,7 +18,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library work;
-use work.fpu_util_p.all;
+use work.fpu_common_p.all;
 use work.finv_p.all;
 use work.fmul_p.all;
 
