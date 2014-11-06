@@ -84,7 +84,7 @@ package body fpu_common_p is
     return boolean is
   begin
 
-    for i in 0 to v'length-1 loop
+    for i in v'range loop
       if v(i) /= '0' and v(i) /= '1' then
         return true;
       end if;
