@@ -1,8 +1,25 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+
+package fsqrt_p is
+
+  component fsqrt is
+    port (
+      a : in std_logic_vector(31 downto 0);
+      s : out std_logic_vector(31 downto 0));
+  end component;
+
+end package;
+
+
+library IEEE;
+use IEEE.std_logic_1164.all;
 use IEEE.std_logic_misc.all;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
+
+library work;
+use work.fpu_common_p.all;
 
 entity fsqrt is
   port ( A : in  std_logic_vector(31 downto 0);
@@ -1073,7 +1090,7 @@ begin
     A => s3,
     B => s4,
     S => s5);
-    
+
   fmul_connect : fmul port map(
     A => s1,
     B => s2,
@@ -1088,57 +1105,61 @@ begin
     variable ab_unit  : std_logic_vector(63 downto 0);
     variable ka,kb,temp : std_logic_vector(31 downto 0);   --変更
   begin
-    org := A;
 
-    if org(31) = '1' then
-      if org(30 downto 23) = 0 then
-        result := nzero;
-      else
-        result := nnan;
-      end if;
-    elsif org(30 downto 23) = 0 then
-      result := zero;
-    elsif org(30 downto 23) = 255 and org(22 downto 0) /= 0 then
-      result := nan;
-    elsif org = inf then
-      result := inf;
+    if (is_metavalue(A) or is_metavalue(s3) or is_metavalue(s5)) then
+      S <= (others => 'X');
     else
-      result(31) := '0';
-      x := org;
-      index := '0' & org(22 downto 14);
-      if x(23) = '0' then   -- 指数部のLSBが0のとき(２の奇数乗の場合)
-        index(9)  := '1';
-        x(30 downto 23) := "10000000";  --128
-      else                  -- 指数部のLSBが1のとき(２の偶数乗の場合)
-        index(9) := '0';
-        x(30 downto 23) := "01111111";  --127
-      end if;
+      org := A;
 
-      if org(30 downto 23) >= 127 then
-        d := org(30 downto 23) - 127;
-        d := std_logic_vector(shift_right(unsigned(d), 1));
-        result(30 downto 23) := 127 + d;
+      if org(31) = '1' then
+        if org(30 downto 23) = 0 then
+          result := nzero;
+        else
+          result := nnan;
+        end if;
+      elsif org(30 downto 23) = 0 then
+        result := zero;
+      elsif org(30 downto 23) = 255 and org(22 downto 0) /= 0 then
+        result := nan;
+      elsif org = inf then
+        result := inf;
       else
-        d := 127 - org(30 downto 23);
-        d := d + 1;
-        d := std_logic_vector(shift_right(unsigned(d), 1));
-        result(30 downto 23) := 127 - d;
+        result(31) := '0';
+        x := org;
+        index := '0' & org(22 downto 14);
+        if x(23) = '0' then   -- 指数部のLSBが0のとき(２の奇数乗の場合)
+          index(9)  := '1';
+          x(30 downto 23) := "10000000";  --128
+        else                  -- 指数部のLSBが1のとき(２の偶数乗の場合)
+          index(9) := '0';
+          x(30 downto 23) := "01111111";  --127
+        end if;
+
+        if org(30 downto 23) >= 127 then
+          d := org(30 downto 23) - 127;
+          d := std_logic_vector(shift_right(unsigned(d), 1));
+          result(30 downto 23) := 127 + d;
+        else
+          d := 127 - org(30 downto 23);
+          d := d + 1;
+          d := std_logic_vector(shift_right(unsigned(d), 1));
+          result(30 downto 23) := 127 - d;
+        end if;
+
+        ab_unit := table(index);
+        ka := ab_unit(63 downto 32);
+        kb := ab_unit(31 downto 0);
+
+        s1 <= ka;
+        s2 <= x;
+        s4 <= kb;
+        temp := s5;
+
+        result(22 downto 0) := temp(22 downto 0);
       end if;
 
-      ab_unit := table(index);
-      ka := ab_unit(63 downto 32);
-      kb := ab_unit(31 downto 0);
-      
-      s1 <= ka;
-      s2 <= x;
-      s4 <= kb;
-      temp := s5;
-
-      result(22 downto 0) := temp(22 downto 0);
+      S <= result;
     end if;
-    S <= result;
   end process;
 end blackbox;
 
-
-      

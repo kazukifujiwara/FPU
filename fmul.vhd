@@ -1,8 +1,25 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+
+package fmul_p is
+
+  component fmul is
+    port (
+      a, b : in std_logic_vector(31 downto 0);
+      s    : out std_logic_vector(31 downto 0));
+  end component;
+
+end package;
+
+
+library IEEE;
+use IEEE.std_logic_1164.all;
 use IEEE.std_logic_misc.all;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
+
+library work;
+use work.fpu_common_p.all;
 
 entity fmul is
   Port(A,B : in  std_logic_vector(31 downto 0);
@@ -139,6 +156,9 @@ architecture blackbox of FMUL is
   end do_fmul;
 
 begin
-  S <= do_fmul(A, B);
+
+  S <= (others => 'X') when is_metavalue(A) or is_metavalue(B) else
+       do_fmul(A, B);
+
 end blackbox;
-        
+
