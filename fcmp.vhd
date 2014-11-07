@@ -79,7 +79,7 @@ package body fcmp_p is
       end if;
     else
       if d.sign = 0 then
-        return LT
+        return LT;
       else
         if (c.expt & c.frac) < (d.expt & d.frac) then
           return GT;
@@ -95,6 +95,10 @@ package body fcmp_p is
     return fpu_data_t is
   begin
 
+    if is_metavalue(a) or is_metavalue(b) then
+      return to_unsigned(0, 32);
+    end if;
+
     case fcmp_chk(a, b) is
       when EQ => return to_unsigned(1, 32);
       when others => return to_unsigned(0, 32);
@@ -106,6 +110,10 @@ package body fcmp_p is
     return fpu_data_t is
     -- return 1 if a > b
   begin
+
+    if is_metavalue(a) or is_metavalue(b) then
+      return to_unsigned(0, 32);
+    end if;
 
     case fcmp_chk(a, b) is
       when GT => return to_unsigned(1, 32);

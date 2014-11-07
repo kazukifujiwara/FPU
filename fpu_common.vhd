@@ -28,6 +28,7 @@ package fpu_common_p is
   function float_type(f: float_t) return float_type_t;
 
   function is_metavalue(v: std_logic_vector) return boolean;
+  function is_metavalue(v: unsigned) return boolean;
 
 end package;
 
@@ -92,6 +93,12 @@ package body fpu_common_p is
 
     return false;
 
+  end function;
+
+  function is_metavalue(v: unsigned)
+    return boolean is
+  begin
+    return is_metavalue(std_logic_vector(v));
   end function;
 
 end package body;
