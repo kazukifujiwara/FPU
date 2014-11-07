@@ -61,6 +61,7 @@ uint32_t finv(uint32_t org) {
     } else {
       fraction.uint32 = org;
       fraction.exp = 127;
+      fraction.sign = 0;
 
       c = 1.0 / MAX;
       index = (fraction.frac & MASK11) >> 12;

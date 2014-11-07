@@ -1,8 +1,26 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+
+package fadd_p is
+
+  component fadd is
+    port (
+      a, b : in std_logic_vector(31 downto 0);
+      s    : out std_logic_vector(31 downto 0));
+  end component;
+
+end package;
+
+library IEEE;
+use IEEE.std_logic_1164.all;
 use IEEE.std_logic_misc.all;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
+use std.textio.all;
+use ieee.std_logic_textio.all;
+
+library work;
+use work.fpu_common_p.all;
 
 entity fadd is
   Port ( A,B : in std_logic_vector(31 downto 0);
@@ -39,11 +57,11 @@ architecture blackbox of FADD is
     end if;
     return carry;
   end round_even_carry;
-        
+
   function do_fadd(a: std_logic_vector(31 downto 0); b: std_logic_vector(31 downto 0))
     return std_logic_vector
   is
-    
+
   constant nan : std_logic_vector(31 downto 0) :=
     "01111111111111111111111111111111";
   constant zero : std_logic_vector(31 downto 0) :=
@@ -54,7 +72,7 @@ architecture blackbox of FADD is
     "01111111100000000000000000000000";
   constant ninf : std_logic_vector(31 downto 0) :=
     "11111111100000000000000000000000";
-  
+
   variable exp_a, exp_b : std_logic_vector(7 downto 0);
   variable num1, num2 : std_logic_vector(31 downto 0);
   variable sign1, sign2 : std_logic;
@@ -71,8 +89,9 @@ architecture blackbox of FADD is
   variable s_bit : std_logic; -- sticky bit
   variable carry : std_logic; -- round even carry
   variable temp  : std_logic_vector(25 downto 0); -- round_evenに渡すときに使用
-  
+
   begin
+
   if a(30 downto 0) > b(30 downto 0) then
     num1 := a;
     num2 := b;
@@ -109,7 +128,7 @@ architecture blackbox of FADD is
       sum := b;
     end if;
   elsif b(30 downto 23) = 0 then
-    sum := a; 
+    sum := a;
   --elsif a = zero or a = nzero then
   --  if a = nzero and b = nzero then
   --    sum := nzero;
@@ -126,13 +145,14 @@ architecture blackbox of FADD is
     diff := exp1 - exp2;
     if diff > 25 then             -- 整数と比較可能？
       sum := num1;
-     
+
     else
       mant1 := '1' & frac1 & "000";
       mant2 := "0001" & frac2;
       if (diff < 4) then
         mant2 := std_logic_vector(shift_left(unsigned(mant2), (3 - conv_integer(diff))));
       else
+
         if mant2((conv_integer(diff) - 3) downto 0) > 0 then
           s_bit := '1';  -- sticky bit
         else
@@ -140,9 +160,9 @@ architecture blackbox of FADD is
         end if;
         mant2 := std_logic_vector(shift_right(unsigned(mant2), (conv_integer(diff) - 2)));
         mant2 := mant2(25 downto 0) & s_bit;
-      end if;          
-      
-      if sign1 = sign2 then       -- 同符号の場合（加算）  
+      end if;
+
+      if sign1 = sign2 then       -- 同符号の場合（加算）
         sum_mant := ('0' & mant1) + ('0' & mant2);
         if (exp1 = 254) and (sum_mant(27) = '1') then
           if sign1 = '0' then
@@ -189,7 +209,7 @@ architecture blackbox of FADD is
           -- i > 0 であるはず。
 
           -- nflag 不要？
-          
+
           if i < 28 then
             if exp1 > i - 1 then
               sum(30 downto 23) := exp1 + 1 - i;
@@ -216,7 +236,7 @@ architecture blackbox of FADD is
                 sum := nzero;
               end if;
             end if;
-          end if;  
+          end if;
         end if;
       end if;
     end if;
@@ -226,6 +246,8 @@ architecture blackbox of FADD is
   end do_fadd;
 
 begin
-  S <= do_fadd(A, B);
+
+  S <= (others => 'X') when is_metavalue(A) or is_metavalue(B) else
+       do_fadd(A, B);
 end blackbox;
 

@@ -1,8 +1,25 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+
+package finv_p is
+
+  component finv is
+    port (
+      a : in std_logic_vector(31 downto 0);
+      s : out std_logic_vector(31 downto 0));
+  end component;
+
+end package;
+
+
+library IEEE;
+use IEEE.std_logic_1164.all;
 use IEEE.std_logic_misc.all;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
+
+library work;
+use work.fpu_common_p.all;
 
 entity finv is
   port ( A : in  std_logic_vector(31 downto 0);
@@ -10,7 +27,7 @@ entity finv is
 end entity finv;
 
 architecture blackbox of FINV is
-   
+
   -- a(32bit) & b(32bit) の計64bitを返す
   function table(index: std_logic_vector(10 downto 0))
     return std_logic_vector
@@ -2082,7 +2099,7 @@ architecture blackbox of FINV is
          B : in  std_logic_vector(31 downto 0);
          S : out std_logic_vector(31 downto 0));
   end component; 
-    
+  
   constant nan   : std_logic_vector(31 downto 0) := x"7fffffff";
   constant zero  : std_logic_vector(31 downto 0) := x"00000000";
   constant nzero : std_logic_vector(31 downto 0) := x"80000000";
@@ -2090,7 +2107,7 @@ architecture blackbox of FINV is
   constant ninf  : std_logic_vector(31 downto 0) := x"ff800000";
 
   signal s1,s2,s3,s4,s5 : std_logic_vector(31 downto 0);
-    
+
 begin
 
   -- Component Instantiation
@@ -2098,7 +2115,7 @@ begin
     A => s3,
     B => s4,
     S => s5);
-    
+
   fmul_connect : fmul port map(
     A => s1,
     B => s2,
@@ -2113,59 +2130,66 @@ begin
     variable ab_unit  : std_logic_vector(63 downto 0);
     variable ka,kb,temp : std_logic_vector(31 downto 0);   --変更
   begin
-    org := A;
-  
-    if (org(30 downto 23) = 255 and org(22 downto 0) /= 0) then
-      result := nan;
-    elsif org(31) = '0' and org(30 downto 23) = 0 then
-      result := inf;
-    elsif org(31) = '1' and org(30 downto 23) = 0 then
-      result := ninf;
-    elsif org = inf then
-      result := zero;
-    elsif org = ninf then
-      result := nzero;
-    else
-      if org(22 downto 0) = 0 then
-        result := org;
-        if org(30 downto 23) >= 127 then
-          d := org(30 downto 23) - 127;
-          result(30 downto 23) := 127 - d;
-        else
-          d := 127 - org(30 downto 23);
-          result(30 downto 23) := 127 + d;
-        end if;
-      else
-        fraction := org;
-        fraction(31) := '0';
-        fraction(30 downto 23) := "01111111";
-        index := fraction(22 downto 12);
-        ab_unit := table(index);
-        ka := ab_unit(63 downto 32);
-        kb := ab_unit(31 downto 0);
-        ka(31) := '1';
-        
-        s1 <= ka;
-        s2 <= fraction;
-        s4 <= kb;
-        temp := s5;
 
-        result(31) := org(31);
-        if org(30 downto 23) >= 127 then
-          d := org(30 downto 23) - 127;
-          if d < 126 then
-            result(30 downto 23) := 126 - d; -- 127 - d - 1
-            result(22 downto 0)  := temp(22 downto 0);
+    if is_metavalue(A) then
+      S <= (others => 'X');
+    else
+      org := A;
+
+      if (org(30 downto 23) = 255 and org(22 downto 0) /= 0) then
+        result := nan;
+      elsif org(31) = '0' and org(30 downto 23) = 0 then
+        result := inf;
+      elsif org(31) = '1' and org(30 downto 23) = 0 then
+        result := ninf;
+      elsif org = inf then
+        result := zero;
+      elsif org = ninf then
+        result := nzero;
+      else
+        if org(22 downto 0) = 0 then
+          result := org;
+          if org(30 downto 23) >= 127 then
+            d := org(30 downto 23) - 127;
+            result(30 downto 23) := 127 - d;
           else
-            result(30 downto 0) := "000" & x"0000000";
+            d := 127 - org(30 downto 23);
+            result(30 downto 23) := 127 + d;
           end if;
         else
-          d := 127 - org(30 downto 23);
-          result(30 downto 23) := 126 + d; -- 127 + d - 1
-          result(22 downto 0)  := temp(22 downto 0);
+          fraction := org;
+          fraction(31) := '0';
+          fraction(30 downto 23) := "01111111";
+          index := fraction(22 downto 12);
+          ab_unit := table(index);
+          ka := ab_unit(63 downto 32);
+          kb := ab_unit(31 downto 0);
+          ka(31) := '1';
+
+          s1 <= ka;
+          s2 <= fraction;
+          s4 <= kb;
+          temp := s5;
+
+          result(31) := org(31);
+          if org(30 downto 23) >= 127 then
+            d := org(30 downto 23) - 127;
+            if d < 126 then
+              result(30 downto 23) := 126 - d; -- 127 - d - 1
+              result(22 downto 0)  := temp(22 downto 0);
+            else
+              result(30 downto 0) := "000" & x"0000000";
+            end if;
+          else
+            d := 127 - org(30 downto 23);
+            result(30 downto 23) := 126 + d; -- 127 + d - 1
+            result(22 downto 0)  := temp(22 downto 0);
+          end if;
         end if;
       end if;
-    end if; 
-    S <= result;
+
+      S <= result;
+
+    end if;
   end process;
 end blackbox;
