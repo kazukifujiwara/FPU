@@ -86,10 +86,15 @@ uint32_t itof(uint32_t a) {
       } else {
 	s_bit = or_nbit(temp, (i-25));
 	frac_grs = (temp << (32 - i)) >> 6;
-	frac_grs = frac_grs + s_bit;
+	frac_grs = frac_grs | s_bit;
+	printf("s_bit : %d\n", s_bit); //debug
       }
       result.frac = round_even_26bit(frac_grs);
+
+      printf("frac_grs : %7x\n", frac_grs); //debug
+
       if (round_even_carry_26bit(frac_grs) == 1) {
+	printf("debug!!!\n");
 	result.exp++;   // int -> float なので inf (or -inf) になる心配はない
       }
     }
