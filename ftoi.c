@@ -34,7 +34,7 @@ uint32_t ftoi(uint32_t a) {
   } else {
     diff = a_32bit.exp - 127;
     if (diff > 30) {
-      if (flag = 0) {
+      if (flag == 0) {
 	result = INT_MAX;
       } else {
 	result = NINT_MAX;
