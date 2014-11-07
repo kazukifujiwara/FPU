@@ -24,21 +24,6 @@ int round_even_carry_26bit(unsigned int num) {
     return 0;
 }
 
-uint32_t bit_invert(uint32_t a) {
-  uint32_t result = 0;
-  uint32_t temp;
-  int flag; // 0 or 1;
-  int nflag; // 反転させたもの
-  int i;
-  for (i = 0; i < 32; i++) {
-    temp = a >> (31 - i);
-    flag = temp & 1;
-    nflag = 1 - flag;
-    result = result + (nflag << (31 - i));
-  }
-  return (result);
-}
-
 uint32_t itof(uint32_t a) {
   
   union data_32bit a_32bit, result;
@@ -54,12 +39,16 @@ uint32_t itof(uint32_t a) {
   
   if (a == 0) {
     result.uint32 = ZERO;
+  } else if (a == NINT_MAX) {
+    result.sign = 1;
+    result.exp  = 158;  // 127 + 31
+    result.frac = 0;
   } else {
     
     if (flag == 0) {
       temp = a;
     } else {
-      temp = bit_invert(a-1);
+      temp = ~(a-1);
     }
 
     i = 30;
@@ -87,14 +76,9 @@ uint32_t itof(uint32_t a) {
 	s_bit = or_nbit(temp, (i-25));
 	frac_grs = (temp << (32 - i)) >> 6;
 	frac_grs = frac_grs | s_bit;
-	printf("s_bit : %d\n", s_bit); //debug
       }
       result.frac = round_even_26bit(frac_grs);
-
-      printf("frac_grs : %7x\n", frac_grs); //debug
-
       if (round_even_carry_26bit(frac_grs) == 1) {
-	printf("debug!!!\n");
 	result.exp++;   // int -> float なので inf (or -inf) になる心配はない
       }
     }
