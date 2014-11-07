@@ -8,12 +8,12 @@ use std.textio.all;
 
 library work;
 use work.fpu_common_p.all;
-use work.fcmp_p.all;
+use work.ftoi_p.all;
 
-entity fcmp_gt_tb is
-end fcmp_gt_tb;
+entity ftoi_tb is
+end ftoi_tb;
 
-architecture test of fcmp_gt_tb is
+architecture test of ftoi_tb is
   signal a, b, s : fpu_data_t;
 begin
 
@@ -21,21 +21,18 @@ begin
     variable l, m: line;
     variable i: integer := 0;
     variable j: integer := 0;
-    variable a, b, s, t: std_logic_vector(31 downto 0);
+    variable a, s, t: std_logic_vector(31 downto 0);
   begin
 
     while endfile(input) = false loop
       readline(input, l);
       hread(l, a);
-      hread(l, b);
       hread(l, s);
 
-      t := std_logic_vector(fcmp_gt(unsigned(a), unsigned(b)));
+      t := std_logic_vector(ftoi(unsigned(a)));
 
       if t /= s then
         hwrite(m, a);
-        write(m, string'(" "));
-        hwrite(m, b);
         write(m, string'(" "));
         hwrite(m, s);
         write(m, string'(" "));

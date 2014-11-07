@@ -13,11 +13,13 @@ end package;
 
 package body itof_p is
 
-  function round_even_26bit(num: fpu_data_t)
+  function round_even_26bit(n: fpu_data_t)
     return fpu_data_t is
 
     variable right4: fpu_data_t;
+    variable num: fpu_data_t;
   begin
+    num := n;
     right4 := num and x"0000000f";
 
     if (3 < right4 and right4 < 8) or 11 < right4 then
@@ -40,7 +42,7 @@ package body itof_p is
     end if;
   end function;
 
-  function or_nbit(a: fpu_data_t,
+  function or_nbit(a: fpu_data_t;
                    n: integer range 0 to 31)
     return fpu_data_t is
   begin
@@ -56,21 +58,21 @@ package body itof_p is
   function itof(a: fpu_data_t) return fpu_data_t is
 
     variable a_32bit, result: float_t;
-    variable frag: unsigned(0 downto 0);
+    variable flag: unsigned(0 downto 0);
     variable i: integer range 0 to 30;
     variable frac: fpu_data_t;
-    variable frac_gts: fpu_data_t;
+    variable frac_grs: fpu_data_t;
     variable s_bit: fpu_data_t;
     variable temp: fpu_data_t;
 
   begin
 
     a_32bit := float(a);
-    flag = a.sign;
+    flag := a_32bit.sign;
 
     if a = 0 then
-      result := float(0x"00000000");
-    elsif a = 0x"80000000" then
+      result := float(x"00000000");
+    elsif a = x"80000000" then
       result.sign := "1";
       result.expt := x"9e";
       result.frac := (others => '0');
@@ -82,12 +84,12 @@ package body itof_p is
       end if;
 
       i := 30;
-      while temp(i) = "0" loop
-        i := -1;
+      while temp(i) = '0' and i > 0 loop
+        i := i - 1;
       end loop;
 
-      result.sign = flag;
-      result.exp  = unsigned(127 + i, 8);
+      result.sign := flag;
+      result.expt  := to_unsigned(127 + i, 8);
 
       if i < 24 then
         frac := temp and x"7FFFFF";
@@ -109,9 +111,9 @@ package body itof_p is
             frac_grs := frac_grs or s_bit;
         end case;
 
-        result.frac := round_even_26bit(frac_grs)(25 downto 0);
+        result.frac := round_even_26bit(frac_grs)(22 downto 0);
         if round_even_carry_26bit(frac_grs) = 1 then
-          result.expt = result.expt+1;
+          result.expt := result.expt+1;
         end if;
       end if;
     end if;

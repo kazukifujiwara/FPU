@@ -16,10 +16,10 @@ package body ftoi_p is
   function bit_invert(a: fpu_data_t)
     return fpu_data_t is
 
-    variable result: fpu_data_t := (othser => 0);
+    variable result: fpu_data_t := (others => '0');
     variable temp: fpu_data_t;
     variable flag: fpu_data_t;
-    variable nflag: unsigned(0 downto 0);
+    variable nflag: fpu_data_t;
     variable i: integer range 0 to 31;
 
   begin
@@ -28,7 +28,7 @@ package body ftoi_p is
       temp := shift_right(a, 31-i);
       flag := temp and x"00000001";
       nflag := not flag;
-      result = result + shift_left(nflag, 31-i);
+      result := result + shift_left(nflag, 31-i);
     end loop;
 
     return result;
@@ -51,10 +51,10 @@ package body ftoi_p is
     flag := resize(a_32bit.sign, 32);
 
 
-    if a_32bit.exp < 127 then
+    if a_32bit.expt < 127 then
       result := x"00000000";
     else
-      diff = to_integer(a_32bit.exp) - 127;
+      diff := to_integer(a_32bit.expt) - 127;
 
       if diff > 30 then
         if flag = 0 then
@@ -65,16 +65,16 @@ package body ftoi_p is
       else
         if diff < 23 then
           n := diff;
-          nbit := shift_right(a_32bit.frac, 23-n);
+          nbit := resize(shift_right(a_32bit.frac, 23-n), 32);
         else
           n := 23;
-          nbit := a_32bit.frac;
+          nbit := resize(a_32bit.frac, 32);
         end if;
         result := shift_left(x"00000001", diff) +
                   shift_left(nbit, diff - n);
       end if;
       if flag = 1 then
-        result = bit_invert(result) + 1;
+        result := bit_invert(result) + 1;
       end if;
     end if;
 
