@@ -12,6 +12,9 @@
 #define NINF     4286578688u
 #define MY_NAN      2147483647u
 #define NNAN     4290772992u
+#define INT_MAX  2147483647u
+#define NINT_MAX 2147483648u
+
 
 union data_32bit {
   struct {
