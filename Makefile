@@ -7,7 +7,7 @@ LD = gcc
 LDFLAGS = -lm
 
 TESTBENCH = fcmp_gt_tb ftoi_tb itof_tb
-SOURCES =  fcmp.vhd fcmp_gt_tb.vhd ftoi_tb.vhd ftrc.vhd itof_tb.vhd itof.vhd fpu_common.vhd
+SOURCES =  fcmp.vhd fcmp_gt_tb.vhd ftoi_tb.vhd ftoi_func.vhd itof_tb.vhd itof_func.vhd fpu_common.vhd
 GHDLC = ghdl
 GHDLFLAGS  = -g --ieee=synopsys --mb-comments -fexplicit
 GHDL_SIM_OPT = --stop-time=20ms

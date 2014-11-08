@@ -84,7 +84,7 @@ package body itof_p is
       end if;
 
       i := 30;
-      while temp(i) = '0' and i > 0 loop
+      while i > 0 and temp(i) = '1' loop
         i := i - 1;
       end loop;
 
@@ -92,19 +92,19 @@ package body itof_p is
       result.expt  := to_unsigned(127 + i, 8);
 
       if i < 24 then
-        frac := temp and x"7FFFFF";
+        frac := temp and x"007FFFFF";
         frac := shift_left(frac, 23-i);
         result.frac := frac(22 downto 0);
       else
         case i is
           when 24 =>
-            frac_grs := shift_left(temp and x"7FFFFF", 3);
+            frac_grs := shift_left(temp and x"007FFFFF", 3);
           when 25 =>
-            frac_grs := shift_left(temp and x"7FFFFF", 2);
+            frac_grs := shift_left(temp and x"007FFFFF", 2);
           when 26 =>
-            frac_grs := shift_left(temp and x"7FFFFF", 1);
+            frac_grs := shift_left(temp and x"007FFFFF", 1);
           when 27 =>
-            frac_grs := temp and x"7FFFFF";
+            frac_grs := temp and x"007FFFFF";
           when others =>
             s_bit := or_nbit(temp, i-25);
             frac_grs := shift_right(shift_left(temp, 32-i), 6);

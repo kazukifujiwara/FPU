@@ -5,6 +5,8 @@
 #include "MT.h"
 #include "def.h"
 
+const int times = 1<<15;
+
 uint32_t
 rand32()
 {
@@ -22,7 +24,7 @@ gen_fcmp_gt()
 {
 	union data_32bit a, b, s;
 
-	for (int i=0; i < 1<<20; i++)
+	for (int i=0; i < times; i++)
 	{
 		a.uint32 = rand32();
 		b.uint32 = rand32();
@@ -37,7 +39,7 @@ gen_fcmp_eq()
 {
 	union data_32bit a, b, s;
 
-	for (int i=0; i < 1<<20; i++)
+	for (int i=0; i < times; i++)
 	{
 		a.uint32 = rand32();
 		b.uint32 = rand32();
@@ -46,7 +48,7 @@ gen_fcmp_eq()
 		printf("%08X %08X %08X\n", a.uint32, b.uint32, s.uint32);
 	}
 
-	for (int i=0; i < 1<<20; i++)
+	for (int i=0; i < times; i++)
 	{
 		a.uint32 = rand32();
 		s.uint32 = (a.fl32 = a.fl32)?1:0;
@@ -62,7 +64,7 @@ gen_itof()
 {
 	union data_32bit a, s;
 
-	for (int i=0; i < 1<<20; i++)
+	for (int i=0; i < times; i++)
 	{
 		a.uint32 = rand32();
 		s.uint32 = itof(a.uint32);
@@ -78,7 +80,7 @@ gen_ftoi()
 {
 	union data_32bit a, s;
 
-	for (int i=0; i < 1<<20; i++)
+	for (int i=0; i < times; i++)
 	{
 		a.uint32 = rand32();
 		s.uint32 = ftrc(a.uint32);

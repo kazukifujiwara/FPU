@@ -27,7 +27,7 @@ package body ftoi_p is
     for i in 0 to 31 loop
       temp := shift_right(a, 31-i);
       flag := temp and x"00000001";
-      nflag := not flag;
+      nflag := x"00000001" - flag;
       result := result + shift_left(nflag, 31-i);
     end loop;
 
