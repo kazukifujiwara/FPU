@@ -19,10 +19,11 @@ package body itof_p is
     variable right4: fpu_data_t;
     variable num: fpu_data_t;
   begin
+
     num := n;
     right4 := num and x"0000000f";
 
-    if (3 < right4 and right4 < 8) or 11 < right4 then
+    if (4 < right4 and right4 < 8) or 11 < right4 then
       num := shift_right(num, 3) + 1;
     else
       num := shift_right(num, 3);
@@ -31,6 +32,7 @@ package body itof_p is
     return num;
 
   end function;
+
 
   function round_even_carry_26bit(num: fpu_data_t)
     return fpu_data_t is
@@ -41,6 +43,7 @@ package body itof_p is
       return x"00000000";
     end if;
   end function;
+
 
   function or_nbit(a: fpu_data_t;
                    n: integer range 0 to 31)
@@ -84,7 +87,7 @@ package body itof_p is
       end if;
 
       i := 30;
-      while i > 0 and temp(i) = '1' loop
+      while i > 0 and temp(i) = '0' loop
         i := i - 1;
       end loop;
 
