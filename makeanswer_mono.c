@@ -11,7 +11,7 @@ finv.c, fsqrt.cの場合、-lmが必要となるので注意。
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "fsqrt.c"                  //ここを書き換える
+#include "finv.c"                  //ここを書き換える
 #include "fadd.c"
 #include "fmul.c"
 #include "def.c"
@@ -63,7 +63,7 @@ int main(void) {
   
   while (fscanf(input, "%s", a_text) != EOF) {
     a = to_uint32(a_text);
-    ans = fsqrt(a);               //ここを書き換える
+    ans = finv(a);               //ここを書き換える
     output_32bit(ans, output);
   }
   

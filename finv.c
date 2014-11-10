@@ -6,8 +6,9 @@
 #include <math.h>
 #include "def.h"
 
-#define MAX 2048
-#define MASK11 8384512  //((1 << 11) - 1) << 12
+#define MAX 1024
+#define MASK10 8380416         //((1 << 10) - 1) << 13  MAX = 1024
+//#define MASK11 8384512  //((1 << 11) - 1) << 12  MAX = 2048
 
 uint32_t fadd(uint32_t a, uint32_t b);
 
@@ -64,7 +65,7 @@ uint32_t finv(uint32_t org) {
       fraction.sign = 0;
 
       c = 1.0 / MAX;
-      index = (fraction.frac & MASK11) >> 12;
+      index = (fraction.frac & MASK10) >> 13;   //変更
       t = 1 + (c * index);
       a_db = make_a(t,c) * (-1);
       b_db = make_b(t,c);

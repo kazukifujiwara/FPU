@@ -11,6 +11,8 @@
 #include "def.h"
 #include "print.h"
 
+#define PERMIT 4  //誤差何ulpまで許容か
+
 uint32_t finv(uint32_t org);
 
 uint32_t str_to_uint32t(char *str) {
@@ -78,8 +80,8 @@ int equal(uint32_t a_uint32, uint32_t b_uint32) {
       return 1;
     } else {
       diff = a.uint32 - b.uint32;
-      if (-2 <= diff && diff <= 2)
-	return 2; //誤差の範囲が2bit以内の場合
+      if ((PERMIT * (-1)) <= diff && diff <= PERMIT)
+	return 2; //誤差の範囲が(PERMIT)bit以内の場合
       else
 	return 0;
     }
@@ -129,7 +131,7 @@ int main(void)
     memset(a_str, '\0', 33);
   }
 
-  printf("total ~2bit_diff : %d\n", count_1bit_diff);
+  printf("total ~%dbit_diff : %d\n", PERMIT, count_1bit_diff);
   printf("total mistakes  : %d\n", count_mistake);
 
   fclose(fp);

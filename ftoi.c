@@ -19,7 +19,7 @@ uint32_t bit_invert(uint32_t a) {
 }
 
 
-uint32_t ftoi(uint32_t a) {
+uint32_t ftrc(uint32_t a) {
   union data_32bit a_32bit;
   uint32_t result;
   int flag;  // 正なら0,負なら1
