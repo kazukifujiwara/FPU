@@ -67,12 +67,26 @@ package body fcmp_p is
       when others => null;
     end case;
 
-    if a = b then
-      return EQ;
-    elsif a > b then
-      return GT;
+    if c.sign = 0 then
+      if d.sign = 0 then
+        if (c.expt & c.frac) > (d.expt & d.frac) then
+          return GT;
+        else
+          return LT;
+        end if;
+      else
+        return GT;
+      end if;
     else
-      return LT;
+      if d.sign = 0 then
+        return LT;
+      else
+        if (c.expt & c.frac) < (d.expt & d.frac) then
+          return GT;
+        else
+          return LT;
+        end if;
+      end if;
     end if;
 
   end function;
@@ -80,6 +94,10 @@ package body fcmp_p is
   function fcmp_eq(a, b: fpu_data_t)
     return fpu_data_t is
   begin
+
+    if is_metavalue(a) or is_metavalue(b) then
+      return to_unsigned(0, 32);
+    end if;
 
     case fcmp_chk(a, b) is
       when EQ => return to_unsigned(1, 32);
@@ -92,6 +110,10 @@ package body fcmp_p is
     return fpu_data_t is
     -- return 1 if a > b
   begin
+
+    if is_metavalue(a) or is_metavalue(b) then
+      return to_unsigned(0, 32);
+    end if;
 
     case fcmp_chk(a, b) is
       when GT => return to_unsigned(1, 32);
