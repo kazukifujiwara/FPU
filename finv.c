@@ -43,7 +43,7 @@ uint32_t finv(uint32_t a_uint32) {
       diff = 127 - a.exp;
       result.exp = 127 + diff;
     }
-  } else if (a.exp == 254 && a.frac == FRAC_MAX) {
+  } else if (a.exp == 254) {
     if (a.sign == 0) {
       result.uint32 = ZERO;
     } else {

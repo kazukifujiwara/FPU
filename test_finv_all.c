@@ -10,7 +10,7 @@
 #include "def.h"
 #include "print.h"
 
-#define PERMIT 4  //誤差の許容範囲　何ulpまでか
+#define PERMIT 3  //誤差の許容範囲　何ulpまでか
 
 uint32_t finv(uint32_t org);
 
@@ -59,23 +59,23 @@ int count_diff(uint32_t a_uint32, uint32_t b_uint32) {
   b.uint32 = b_uint32;
   if ((a.exp == 255) && (a.frac != 0)) { // aがNaNの場合
     if ((b.exp == 255) && (b.frac != 0)) {
-      return 1; //NaNは全て同一視
+      return 0; //NaNは全て同一視
     } else {
-      return 0;
+      return (PERMIT + 1);
     }
   } else if (a.exp == 0) {
     if (b.exp == 0) {
       if (a.sign == b.sign) {
-	return 1;
-      } else {
 	return 0;
+      } else {
+	return (PERMIT + 1);
       }
     } else {
-      return 0;
+      return (PERMIT + 1);
     }
   } else {
     if (a.uint32 == b.uint32) {
-      return 1;
+      return 0;
     } else {
       diff = a.uint32 - b.uint32;
       if (diff >= 0) {
