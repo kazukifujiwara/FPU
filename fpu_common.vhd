@@ -25,6 +25,12 @@ package fpu_common_p is
     MINUS_INF,
     NAN);
 
+  constant VAL_NAN: fpu_data_t := x"7fffffff";
+  constant VAL_PLUS_ZERO: fpu_data_t := x"00000000";
+  constant VAL_MINUS_ZERO: fpu_data_t := x"80000000";
+  constant VAL_PLUS_INF: fpu_data_t := x"7f800000";
+  constant VAL_MINUS_INF: fpu_data_t := x"ff800000";
+
   function float_type(f: float_t) return float_type_t;
 
   function is_metavalue(v: std_logic_vector) return boolean;
