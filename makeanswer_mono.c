@@ -49,24 +49,25 @@ uint32_t to_uint32(char *text) {
 int main(void) {
 
   FILE *input, *output;
-  char a_text[33], b_text[33];
+  char a_text[33];
   uint32_t a, ans;
-
+  
   if ((input = fopen(INPUT, "r")) == NULL) {
     printf("file open error.\n");
     exit(EXIT_FAILURE);
   }
+  
   if ((output = fopen(OUTPUT, "w")) == NULL) {
     printf("file open error.\n");
     exit(EXIT_FAILURE);
   }
-  
+ 
   while (fscanf(input, "%s", a_text) != EOF) {
     a = to_uint32(a_text);
     ans = finv(a);               //ここを書き換える
     output_32bit(ans, output);
   }
-  
+
   close(input);
   close(output);
 
